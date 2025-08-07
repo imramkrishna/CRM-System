@@ -10,6 +10,10 @@ html {
   margin: 0;
   padding: 0;
   height: 100%;
+  background: white !important;
+  /* Fix for Mac browsers */
+  min-height: 100vh;
+  width: 100%;
 }
 
 body {
@@ -20,6 +24,10 @@ body {
   overflow-x: hidden;
   min-height: 100vh;
   height: 100%;
+  background: white !important;
+  /* Fix for Mac browsers */
+  width: 100%;
+  position: relative;
 }
 
 /* Reset for all elements */
@@ -73,47 +81,95 @@ header {
 
 main {
   margin: 0 !important;
+  padding: 0 !important;
 }
 
-/* DEBUG: Different colors for each container to identify spacing issues */
-html {
-  background: white !important;
-  /* Fixed: Should be white, not red */
-  height: 100%;
-}
-
-body {
-  background: white !important;
-  height: 100%;
-}
-
+/* Fix for Mac browsers - Next.js containers */
 #__next,
 [data-nextjs-scroll-focus-boundary] {
   background: white !important;
-  min-height: 100%;
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
 }
 
+/* Layout container - fix for Mac */
 .layout-container {
   background: white !important;
   min-height: 100vh;
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
+/* Header - white background */
 header {
   background: white !important;
+  width: 100%;
+  z-index: 1000;
 }
 
+/* Main content - remove orange background */
 main {
   background: white !important;
+  flex: 1;
+  width: 100%;
+  position: relative;
 }
 
+/* Footer - restore original dark background */
 footer {
-  background: white !important;
+  background: #1f2937 !important;
+  /* Tailwind gray-800 equivalent */
+  color: white !important;
+  width: 100%;
+  margin-top: auto;
 }
 
+/* Hero section - proper gradient */
 .hero-section {
   background: linear-gradient(to bottom right, rgb(239 246 255), white) !important;
+  width: 100%;
 }
 
+/* Features section - white background */
 .features-section {
   background: white !important;
+  width: 100%;
+}
+
+/* Additional fixes for Mac browsers */
+.page-container {
+  background: white !important;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Fix for scroll boundary in Mac browsers */
+div[data-nextjs-scroll-focus-boundary] {
+  background: white !important;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Mac-specific fixes */
+@media screen and (-webkit-min-device-pixel-ratio: 1) {
+
+  html,
+  body {
+    height: 100%;
+    min-height: 100vh;
+    background: white !important;
+  }
+
+  .layout-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  main {
+    flex: 1;
+  }
 }

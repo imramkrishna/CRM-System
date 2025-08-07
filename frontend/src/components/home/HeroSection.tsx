@@ -10,7 +10,7 @@ const HeroSection = () => {
                     <div className="lg:col-span-6">
                         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
                             Advanced
-                            <span className="text-blue-600"> Surgical Solutions</span>
+                            <span className="text-blue-600"> Medical Solutions</span>
                         </h1>
                         <p className="mt-6 text-xl text-gray-600 leading-relaxed">
                             Harmony Surgitech delivers precision-engineered medical instruments and equipment
