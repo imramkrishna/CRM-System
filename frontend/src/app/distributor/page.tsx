@@ -498,10 +498,10 @@ const DistributorDashboard = () => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${order.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                                                order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
-                                                    order.status === 'processing' ? 'bg-yellow-100 text-yellow-800' :
-                                                        order.status === 'pending' ? 'bg-orange-100 text-orange-800' :
-                                                            'bg-red-100 text-red-800'
+                                            order.status === 'shipped' ? 'bg-blue-100 text-blue-800' :
+                                                order.status === 'processing' ? 'bg-yellow-100 text-yellow-800' :
+                                                    order.status === 'pending' ? 'bg-orange-100 text-orange-800' :
+                                                        'bg-red-100 text-red-800'
                                             }`}>
                                             {order.status === 'delivered' && <CheckCircle className="h-3 w-3 mr-1" />}
                                             {order.status === 'shipped' && <Package className="h-3 w-3 mr-1" />}

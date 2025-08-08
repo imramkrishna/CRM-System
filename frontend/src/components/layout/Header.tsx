@@ -25,7 +25,7 @@ const Header = () => {
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
     return (
-        <header className="fixed top-0 left-0 right-0 z-[1000] bg-white shadow-sm border-b border-gray-100">
+        <header className="fixed top-0 left-0 right-0 z-[1000] bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-100 transition-all duration-200">
             <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
                 <div className="flex justify-between items-center h-16">{/* Ensure consistent height */}
                     {/* Logo */}
@@ -97,7 +97,7 @@ const Header = () => {
 
                 {/* Mobile Navigation */}
                 {isMenuOpen && (
-                    <div className="md:hidden absolute top-full left-0 right-0 bg-white border-t border-gray-100 shadow-lg">
+                    <div className="md:hidden absolute top-full left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-100 shadow-lg">
                         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                             {navigation.map((item) => (
                                 <Link
