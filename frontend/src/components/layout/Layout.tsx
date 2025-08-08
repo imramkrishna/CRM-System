@@ -10,7 +10,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     return (
         <div className="min-h-screen bg-white layout-container">
             <Header />
-            <main className="pt-24"> {/* Increased padding to prevent overlap */}
+            <main className="pt-28"> {/* Increased padding to prevent overlap */}
                 {children}
             </main>
             <Footer />

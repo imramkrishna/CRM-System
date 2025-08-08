@@ -38,7 +38,7 @@ export default function BecomeDistributorPage() {
     if (isSubmitted) {
         return (
             <Layout>
-                <div className="py-12">
+                <div className="py-8 mt-4">
                     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                         <div className="bg-green-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6">
                             <Send className="h-8 w-8 text-green-600" />
@@ -67,10 +67,10 @@ export default function BecomeDistributorPage() {
 
     return (
         <Layout>
-            <div className="py-12">
+            <div className="py-14 mt-4">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Header */}
-                    <div className="text-center mb-12">
+                    <div className="text-center mb-8">
                         <h1 className="text-4xl font-bold text-gray-900 mb-4">
                             Become a Distributor
                         </h1>
