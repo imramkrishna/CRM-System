@@ -1,30 +1,25 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 html {
   scroll-behavior: smooth;
   margin: 0;
   padding: 0;
   height: 100%;
-  background: white !important;
+  background: #ffffff;
   /* Fix for Mac browsers */
   min-height: 100vh;
   width: 100%;
 }
 
 body {
-  color: var(--foreground);
+  color: #171717;
   font-family: var(--font-inter), system-ui, sans-serif;
   margin: 0;
   padding: 0;
   overflow-x: hidden;
   min-height: 100vh;
   height: 100%;
-  background: white !important;
+  background-color: #ffffff;
   /* Fix for Mac browsers */
   width: 100%;
   position: relative;
@@ -35,6 +30,24 @@ body {
 *::before,
 *::after {
   box-sizing: border-box;
+}
+
+/* Mobile responsiveness improvements */
+@media (max-width: 640px) {
+  body {
+    font-size: 14px;
+  }
+
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+    /* Prevents zoom on iOS */
+  }
 }
 
 /* Custom scrollbar */
@@ -70,7 +83,7 @@ body {
   left: 0 !important;
   right: 0 !important;
   z-index: 1000 !important;
-  background: white !important;
+  background: var(--background) !important;
   width: 100% !important;
 }
 
@@ -87,7 +100,7 @@ main {
 /* Fix for Mac browsers - Next.js containers */
 #__next,
 [data-nextjs-scroll-focus-boundary] {
-  background: white !important;
+  background: var(--background) !important;
   min-height: 100vh;
   width: 100%;
   position: relative;
@@ -95,7 +108,7 @@ main {
 
 /* Layout container - fix for Mac */
 .layout-container {
-  background: white !important;
+  background: var(--background) !important;
   min-height: 100vh;
   width: 100%;
   position: relative;
@@ -103,16 +116,16 @@ main {
   flex-direction: column;
 }
 
-/* Header - white background */
+/* Header - background */
 header {
-  background: white !important;
+  background: var(--background) !important;
   width: 100%;
   z-index: 1000;
 }
 
-/* Main content - remove orange background */
+/* Main content */
 main {
-  background: white !important;
+  background: var(--background) !important;
   flex: 1;
   width: 100%;
   position: relative;
@@ -129,26 +142,26 @@ footer {
 
 /* Hero section - proper gradient */
 .hero-section {
-  background: linear-gradient(to bottom right, rgb(239 246 255), white) !important;
+  background: linear-gradient(to bottom right, rgb(239 246 255), var(--background)) !important;
   width: 100%;
 }
 
-/* Features section - white background */
+/* Features section */
 .features-section {
-  background: white !important;
+  background: var(--background) !important;
   width: 100%;
 }
 
 /* Additional fixes for Mac browsers */
 .page-container {
-  background: white !important;
+  background: var(--background) !important;
   min-height: 100vh;
   width: 100%;
 }
 
 /* Fix for scroll boundary in Mac browsers */
 div[data-nextjs-scroll-focus-boundary] {
-  background: white !important;
+  background: var(--background) !important;
   min-height: 100vh;
   width: 100%;
 }
@@ -160,7 +173,7 @@ div[data-nextjs-scroll-focus-boundary] {
   body {
     height: 100%;
     min-height: 100vh;
-    background: white !important;
+    background: var(--background) !important;
   }
 
   .layout-container {
