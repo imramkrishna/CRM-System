@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Product } from '@/types';
 import { ShoppingCart, Eye, Star, CheckCircle, Clock } from 'lucide-react';
 
@@ -16,9 +17,11 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
             {/* Product Image */}
             <div className="relative h-64 bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
-                <img
+                <Image
                     src={product.image}
                     alt={product.name}
+                    width={400}
+                    height={256}
                     className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
                 />
 

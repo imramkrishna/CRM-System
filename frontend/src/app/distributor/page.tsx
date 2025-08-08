@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppSelector, useAppDispatch } from '@/lib/hooks';
 import { logout } from '@/lib/slices/authSlice';
-import { Package, ShoppingCart, TrendingUp, DollarSign, LogOut, Bell, Search } from 'lucide-react';
+import { Package, ShoppingCart, TrendingUp, DollarSign, LogOut, Search } from 'lucide-react';
 
 const DistributorDashboard = () => {
     const router = useRouter();

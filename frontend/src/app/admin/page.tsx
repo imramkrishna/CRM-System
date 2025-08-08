@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppSelector, useAppDispatch } from '@/lib/hooks';
 import { logout } from '@/lib/slices/authSlice';
-import { Users, Package, TrendingUp, Settings, LogOut, Bell, Search } from 'lucide-react';
+import { Users, Package, TrendingUp, LogOut, Bell, Search } from 'lucide-react';
 
 const AdminDashboard = () => {
     const router = useRouter();

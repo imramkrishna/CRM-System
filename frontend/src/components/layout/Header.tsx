@@ -2,14 +2,12 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Menu, X, User, LogIn } from 'lucide-react';
+import { Menu, X, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppSelector } from '@/lib/hooks';
 
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const router = useRouter();
     const { isAuthenticated, user } = useAppSelector((state) => state.auth);
 
     const navigation = [

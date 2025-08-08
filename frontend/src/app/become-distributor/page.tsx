@@ -48,15 +48,15 @@ export default function BecomeDistributorPage() {
                         </h1>
                         <p className="text-lg text-gray-600 mb-8">
                             Thank you for your interest in becoming a Harmony Surgitech distributor.
-                            We've received your application and will review it within 3-5 business days.
+                            We&apos;ve received your application and will review it within 3-5 business days.
                         </p>
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                            <h3 className="font-semibold text-gray-900 mb-2">What's Next?</h3>
+                            <h3 className="font-semibold text-gray-900 mb-2">What&apos;s Next?</h3>
                             <ul className="text-left text-gray-700 space-y-2">
                                 <li>• Our team will review your application</li>
-                                <li>• We'll conduct a background check on your company</li>
-                                <li>• If approved, we'll schedule a call to discuss partnership details</li>
-                                <li>• You'll receive onboarding materials and access to our distributor portal</li>
+                                <li>• We&apos;ll conduct a background check on your company</li>
+                                <li>• If approved, we&apos;ll schedule a call to discuss partnership details</li>
+                                <li>• You&apos;ll receive onboarding materials and access to our distributor portal</li>
                             </ul>
                         </div>
                     </div>

@@ -42,7 +42,7 @@ const FeaturesSection = () => {
                         Why Choose Harmony Surgitech?
                     </h2>
                     <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                        We're committed to providing healthcare professionals with the finest surgical instruments
+                        We&apos;re committed to providing healthcare professionals with the finest surgical instruments
                         and medical equipment to deliver exceptional patient care.
                     </p>
                 </div>

@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import Layout from '@/components/layout/Layout';
 import ProductCard from '@/components/products/ProductCard';
 import { products, categories } from '@/data/products';
-import { Search, Filter, Grid, List, SlidersHorizontal, ArrowUpDown, X, Star } from 'lucide-react';
+import { Search, Grid, List, SlidersHorizontal, ArrowUpDown, X, Star } from 'lucide-react';
 
 export default function ProductsPage() {
     const [searchTerm, setSearchTerm] = useState('');
@@ -310,9 +311,11 @@ export default function ProductsPage() {
                                             /* Enhanced List View Layout */
                                             <div className="flex flex-col sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
                                                 <div className="relative">
-                                                    <img
+                                                    <Image
                                                         src={product.image}
                                                         alt={product.name}
+                                                        width={128}
+                                                        height={128}
                                                         className="w-full h-48 sm:w-32 sm:h-32 object-cover rounded-xl border border-gray-200 shadow-md"
                                                     />
                                                     <div className="absolute top-2 right-2">
@@ -413,7 +416,7 @@ export default function ProductsPage() {
                                 No products found
                             </h3>
                             <p className="text-sm sm:text-base text-gray-600 mb-6 max-w-md mx-auto px-4">
-                                We couldn't find any products matching your search criteria.
+                                We couldn&apos;t find any products matching your search criteria.
                                 Try adjusting your filters or search terms.
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 px-4">
