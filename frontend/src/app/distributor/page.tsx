@@ -22,7 +22,22 @@ import {
     FileText,
     Clock,
     CheckCircle,
-    XCircle
+    XCircle,
+    Users,
+    Star,
+    Building,
+    Phone,
+    Mail,
+    MapPin,
+    Plus,
+    Filter,
+    Download,
+    Eye,
+    Edit,
+    Trash2,
+    Check,
+    ArrowUpRight,
+    ArrowDownRight
 } from 'lucide-react';
 
 const DistributorDashboard = () => {
@@ -32,6 +47,20 @@ const DistributorDashboard = () => {
     const [activeSection, setActiveSection] = useState('dashboard');
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+
+    // Search states for different sections
+    const [searchQueries, setSearchQueries] = useState({
+        products: '',
+        orders: '',
+        transactions: ''
+    });
+
+    const handleSearchChange = (section: string, value: string) => {
+        setSearchQueries(prev => ({
+            ...prev,
+            [section]: value
+        }));
+    };
 
     useEffect(() => {
         if (!isAuthenticated || user?.role !== 'distributor') {
@@ -394,6 +423,16 @@ const DistributorDashboard = () => {
                         Order Management
                     </h2>
                     <div className="flex flex-wrap gap-3">
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                            <input
+                                type="text"
+                                placeholder="Search orders..."
+                                value={searchQueries.orders}
+                                onChange={(e) => handleSearchChange('orders', e.target.value)}
+                                className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm w-64"
+                            />
+                        </div>
                         <select className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm">
                             <option>All Orders</option>
                             <option>Pending</option>
@@ -557,19 +596,64 @@ const DistributorDashboard = () => {
         <div className="space-y-5">
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                    <h2 className="text-2xl font-bold text-gray-900">Available Products</h2>
+                    <div className="flex items-center space-x-3">
+                        <Package className="h-8 w-8 text-blue-600" />
+                        <h2 className="text-2xl font-bold text-gray-900">Available Products</h2>
+                    </div>
                     <div className="flex flex-wrap gap-3">
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                             <input
                                 type="text"
                                 placeholder="Search products..."
+                                value={searchQueries.products}
+                                onChange={(e) => handleSearchChange('products', e.target.value)}
                                 className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm w-64"
                             />
                         </div>
                         <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
                             Add to Cart
                         </button>
+                    </div>
+                </div>
+
+                {/* Product Stats */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-blue-600 font-medium">Total Products</p>
+                                <p className="text-2xl font-bold text-gray-900">2,847</p>
+                            </div>
+                            <Package className="h-8 w-8 text-blue-500" />
+                        </div>
+                    </div>
+                    <div className="p-4 bg-green-50 rounded-lg border border-green-100">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-green-600 font-medium">Available</p>
+                                <p className="text-2xl font-bold text-gray-900">2,341</p>
+                            </div>
+                            <CheckCircle className="h-8 w-8 text-green-500" />
+                        </div>
+                    </div>
+                    <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-100">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-yellow-600 font-medium">Low Stock</p>
+                                <p className="text-2xl font-bold text-gray-900">89</p>
+                            </div>
+                            <AlertTriangle className="h-8 w-8 text-yellow-500" />
+                        </div>
+                    </div>
+                    <div className="p-4 bg-red-50 rounded-lg border border-red-100">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-red-600 font-medium">Out of Stock</p>
+                                <p className="text-2xl font-bold text-gray-900">23</p>
+                            </div>
+                            <XCircle className="h-8 w-8 text-red-500" />
+                        </div>
                     </div>
                 </div>
 
@@ -692,17 +776,71 @@ const DistributorDashboard = () => {
         <div className="space-y-5">
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                    <h2 className="text-2xl font-bold text-gray-900">Transaction History</h2>
+                    <div className="flex items-center space-x-3">
+                        <History className="h-8 w-8 text-blue-600" />
+                        <h2 className="text-2xl font-bold text-gray-900">Transaction History</h2>
+                    </div>
                     <div className="flex flex-wrap gap-3">
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                            <input
+                                type="text"
+                                placeholder="Search transactions..."
+                                value={searchQueries.transactions}
+                                onChange={(e) => handleSearchChange('transactions', e.target.value)}
+                                className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm w-64"
+                            />
+                        </div>
                         <select className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm">
                             <option>All Transactions</option>
                             <option>Completed</option>
                             <option>Pending</option>
                             <option>Cancelled</option>
                         </select>
-                        <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                            Export
+                        <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2">
+                            <Download className="h-4 w-4" />
+                            <span>Export</span>
                         </button>
+                    </div>
+                </div>
+
+                {/* Transaction Stats */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-blue-600 font-medium">Total Transactions</p>
+                                <p className="text-2xl font-bold text-gray-900">1,247</p>
+                            </div>
+                            <History className="h-8 w-8 text-blue-500" />
+                        </div>
+                    </div>
+                    <div className="p-4 bg-green-50 rounded-lg border border-green-100">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-green-600 font-medium">Completed</p>
+                                <p className="text-2xl font-bold text-gray-900">1,089</p>
+                            </div>
+                            <CheckCircle className="h-8 w-8 text-green-500" />
+                        </div>
+                    </div>
+                    <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-100">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-yellow-600 font-medium">Pending</p>
+                                <p className="text-2xl font-bold text-gray-900">143</p>
+                            </div>
+                            <Clock className="h-8 w-8 text-yellow-500" />
+                        </div>
+                    </div>
+                    <div className="p-4 bg-purple-50 rounded-lg border border-purple-100">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-purple-600 font-medium">Total Value</p>
+                                <p className="text-2xl font-bold text-gray-900">$1.8M</p>
+                            </div>
+                            <DollarSign className="h-8 w-8 text-purple-500" />
+                        </div>
                     </div>
                 </div>
 

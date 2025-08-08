@@ -38,7 +38,22 @@ import {
     Check,
     Clock,
     ArrowUpRight,
-    ArrowDownRight
+    ArrowDownRight,
+    UserPlus,
+    UserCheck,
+    UserX,
+    Calendar,
+    Star,
+    Building,
+    Phone,
+    Mail,
+    MapPin,
+    Truck,
+    RefreshCw,
+    XCircle,
+    Printer,
+    CheckCircle,
+    FileBarChart
 } from 'lucide-react';
 
 const AdminDashboard = () => {
@@ -49,6 +64,27 @@ const AdminDashboard = () => {
     const [activeSection, setActiveSection] = useState('dashboard');
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+
+    // Search states for different sections
+    const [searchQueries, setSearchQueries] = useState({
+        customers: '',
+        orders: '',
+        inventory: '',
+        sellDetails: '',
+        purchases: '',
+        quotation: '',
+        transactions: '',
+        payments: '',
+        reports: '',
+        manualRequest: ''
+    });
+
+    const handleSearchChange = (section: string, value: string) => {
+        setSearchQueries(prev => ({
+            ...prev,
+            [section]: value
+        }));
+    };
 
     useEffect(() => {
         if (!isAuthenticated || user?.role !== 'admin') {
@@ -91,8 +127,9 @@ const AdminDashboard = () => {
                 { id: 'wastage-return', label: 'Wastage Return' }
             ]
         },
-        { id: 'transaction-history', label: 'Transaction History', icon: History },
-        { id: 'pending-payments', label: 'Pending Payments', icon: CreditCard }
+        { id: 'transactions', label: 'Transaction History', icon: RefreshCw },
+        { id: 'payments', label: 'Payment Management', icon: CreditCard },
+        { id: 'reports', label: 'Reports', icon: FileBarChart }
     ];
 
     const stats = [
@@ -196,42 +233,38 @@ const AdminDashboard = () => {
 
             {/* Main Dashboard Content */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                {/* Profit by Category Chart */}
+                {/* Recent Activity */}
                 <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-100">
                     <div className="p-5 border-b border-gray-100">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-2">
-                                <BarChart3 className="h-5 w-5 text-green-600" />
-                                <h3 className="text-base font-semibold text-gray-900">Profit by Category</h3>
+                                <BarChart3 className="h-5 w-5 text-blue-600" />
+                                <h3 className="text-base font-semibold text-gray-900">Recent Activity</h3>
                             </div>
                             <button className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center space-x-1">
-                                <span>This Month</span>
+                                <span>View All</span>
                                 <ChevronDown className="h-4 w-4" />
                             </button>
                         </div>
                     </div>
                     <div className="p-6">
-                        <div className="flex items-center justify-center h-64 rounded-lg">
-                            <div className="text-center">
-                                <div className="w-32 h-32 bg-gradient-to-r from-yellow-400 via-orange-400 to-green-500 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg">
-                                    <span className="text-2xl font-bold text-white">$1M</span>
-                                </div>
-                                <p className="text-gray-600 font-medium">Total Revenue</p>
-                            </div>
-                        </div>
-                        <div className="mt-6 space-y-3">
+                        <div className="space-y-4">
                             {[
-                                { category: "Surgical Instruments", amount: '$510,000', color: 'bg-green-500', icon: 'bg-green-100 text-green-600' },
-                                { category: "Monitoring Equipment", amount: '$295,000', color: 'bg-blue-500', icon: 'bg-blue-100 text-blue-600' },
-                                { category: "Diagnostic Equipment", amount: '$165,000', color: 'bg-yellow-500', icon: 'bg-yellow-100 text-yellow-600' },
-                                { category: "Consumables", amount: '$30,000', color: 'bg-red-500', icon: 'bg-red-100 text-red-600' }
+                                { title: "New order received", desc: "Order #35782 from Memorial Hospital", time: "10 minutes ago", icon: ShoppingBag, iconBg: "bg-blue-100 text-blue-600" },
+                                { title: "Payment received", desc: "Payment of $12,580 received from City Medical", time: "45 minutes ago", icon: DollarSign, iconBg: "bg-green-100 text-green-600" },
+                                { title: "Inventory updated", desc: "15 items added to Surgical Instruments", time: "2 hours ago", icon: Package, iconBg: "bg-purple-100 text-purple-600" },
+                                { title: "New distributor application", desc: "MediEquip Inc. submitted an application", time: "4 hours ago", icon: UserPlus, iconBg: "bg-orange-100 text-orange-600" },
+                                { title: "Quotation approved", desc: "Quotation #QT-234 was approved", time: "Yesterday", icon: CheckCircle, iconBg: "bg-green-100 text-green-600" }
                             ].map((item, index) => (
-                                <div key={index} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                                    <div className="flex items-center space-x-3">
-                                        <div className={`w-3 h-3 rounded-full ${item.color}`}></div>
-                                        <span className="text-sm text-gray-700 font-medium">{item.category}</span>
+                                <div key={index} className="flex items-start space-x-3">
+                                    <div className={`p-2 rounded-full ${item.iconBg}`}>
+                                        <item.icon className="h-5 w-5" />
                                     </div>
-                                    <span className="text-sm font-bold text-gray-900">{item.amount}</span>
+                                    <div className="flex-1">
+                                        <h4 className="text-sm font-medium text-gray-900">{item.title}</h4>
+                                        <p className="text-sm text-gray-600">{item.desc}</p>
+                                        <span className="text-xs text-gray-500">{item.time}</span>
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -406,7 +439,22 @@ const AdminDashboard = () => {
                 return (
                     <div className="space-y-5">
                         <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-5">
-                            <h2 className="text-xl font-bold text-gray-900 mb-5">Sell Details</h2>
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 gap-4">
+                                <div className="flex items-center space-x-3">
+                                    <TrendingUp className="h-8 w-8 text-blue-600" />
+                                    <h2 className="text-xl font-bold text-gray-900">Sell Details</h2>
+                                </div>
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search sales..."
+                                        value={searchQueries.sellDetails}
+                                        onChange={(e) => handleSearchChange('sellDetails', e.target.value)}
+                                        className="pl-10 pr-4 py-2 bg-gray-100 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm w-64 text-gray-900 placeholder-gray-500"
+                                    />
+                                </div>
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                                 <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-5 text-white">
                                     <div className="flex items-center justify-between">
@@ -555,6 +603,8 @@ const AdminDashboard = () => {
                                     <input
                                         type="text"
                                         placeholder="Search distributors..."
+                                        value={searchQueries.customers}
+                                        onChange={(e) => handleSearchChange('customers', e.target.value)}
                                         className="pl-10 pr-4 py-2 bg-gray-100 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm w-full text-gray-900 placeholder-gray-500"
                                     />
                                 </div>
@@ -567,21 +617,41 @@ const AdminDashboard = () => {
 
                         {/* Customer/Distributor Metrics */}
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                            <div className="p-4 bg-blue-50 rounded-lg">
-                                <p className="text-sm text-blue-600">Total Distributors</p>
-                                <p className="text-2xl font-bold text-gray-900">254</p>
+                            <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-blue-600 font-medium">Total Distributors</p>
+                                        <p className="text-2xl font-bold text-gray-900">254</p>
+                                    </div>
+                                    <Users className="h-8 w-8 text-blue-500" />
+                                </div>
                             </div>
-                            <div className="p-4 bg-green-50 rounded-lg">
-                                <p className="text-sm text-green-600">Active</p>
-                                <p className="text-2xl font-bold text-gray-900">186</p>
+                            <div className="p-4 bg-green-50 rounded-lg border border-green-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-green-600 font-medium">Active</p>
+                                        <p className="text-2xl font-bold text-gray-900">186</p>
+                                    </div>
+                                    <UserCheck className="h-8 w-8 text-green-500" />
+                                </div>
                             </div>
-                            <div className="p-4 bg-yellow-50 rounded-lg">
-                                <p className="text-sm text-yellow-600">New This Month</p>
-                                <p className="text-2xl font-bold text-gray-900">15</p>
+                            <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-yellow-600 font-medium">New This Month</p>
+                                        <p className="text-2xl font-bold text-gray-900">15</p>
+                                    </div>
+                                    <UserPlus className="h-8 w-8 text-yellow-500" />
+                                </div>
                             </div>
-                            <div className="p-4 bg-red-50 rounded-lg">
-                                <p className="text-sm text-red-600">Pending Approval</p>
-                                <p className="text-2xl font-bold text-gray-900">8</p>
+                            <div className="p-4 bg-red-50 rounded-lg border border-red-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-red-600 font-medium">Pending Approval</p>
+                                        <p className="text-2xl font-bold text-gray-900">8</p>
+                                    </div>
+                                    <Clock className="h-8 w-8 text-red-500" />
+                                </div>
                             </div>
                         </div>
 
@@ -809,6 +879,8 @@ const AdminDashboard = () => {
                                     <input
                                         type="text"
                                         placeholder="Search orders..."
+                                        value={searchQueries.orders}
+                                        onChange={(e) => handleSearchChange('orders', e.target.value)}
                                         className="bg-transparent border-none outline-none text-sm text-gray-700 placeholder-gray-400"
                                     />
                                 </div>
@@ -870,10 +942,10 @@ const AdminDashboard = () => {
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${order.status === 'Delivered' ? 'bg-green-100 text-green-800' :
-                                                            order.status === 'Processing' ? 'bg-blue-100 text-blue-800' :
-                                                                order.status === 'Shipped' ? 'bg-indigo-100 text-indigo-800' :
-                                                                    order.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                                                                        'bg-gray-100 text-gray-800'
+                                                        order.status === 'Processing' ? 'bg-blue-100 text-blue-800' :
+                                                            order.status === 'Shipped' ? 'bg-indigo-100 text-indigo-800' :
+                                                                order.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                                                                    'bg-gray-100 text-gray-800'
                                                         }`}>
                                                         {order.status}
                                                     </span>
@@ -929,13 +1001,18 @@ const AdminDashboard = () => {
                 return (
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                            <h2 className="text-2xl font-bold text-gray-900">Inventory Management</h2>
+                            <div className="flex items-center space-x-3">
+                                <Package className="h-8 w-8 text-blue-600" />
+                                <h2 className="text-2xl font-bold text-gray-900">Inventory Management</h2>
+                            </div>
                             <div className="flex flex-wrap gap-3">
                                 <div className="relative">
                                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                                     <input
                                         type="text"
                                         placeholder="Search products..."
+                                        value={searchQueries.inventory}
+                                        onChange={(e) => handleSearchChange('inventory', e.target.value)}
                                         className="pl-10 pr-4 py-2 bg-gray-100 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm w-64 text-gray-900 placeholder-gray-500"
                                     />
                                 </div>
@@ -952,21 +1029,41 @@ const AdminDashboard = () => {
 
                         {/* Inventory Stats */}
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                            <div className="p-4 bg-blue-50 rounded-lg">
-                                <p className="text-sm text-blue-600">Total Products</p>
-                                <p className="text-2xl font-bold text-gray-900">4,892</p>
+                            <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-blue-600 font-medium">Total Products</p>
+                                        <p className="text-2xl font-bold text-gray-900">4,892</p>
+                                    </div>
+                                    <Package className="h-8 w-8 text-blue-500" />
+                                </div>
                             </div>
-                            <div className="p-4 bg-green-50 rounded-lg">
-                                <p className="text-sm text-green-600">In Stock</p>
-                                <p className="text-2xl font-bold text-gray-900">3,241</p>
+                            <div className="p-4 bg-green-50 rounded-lg border border-green-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-green-600 font-medium">In Stock</p>
+                                        <p className="text-2xl font-bold text-gray-900">3,241</p>
+                                    </div>
+                                    <Check className="h-8 w-8 text-green-500" />
+                                </div>
                             </div>
-                            <div className="p-4 bg-yellow-50 rounded-lg">
-                                <p className="text-sm text-yellow-600">Low Stock</p>
-                                <p className="text-2xl font-bold text-gray-900">126</p>
+                            <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-yellow-600 font-medium">Low Stock</p>
+                                        <p className="text-2xl font-bold text-gray-900">126</p>
+                                    </div>
+                                    <AlertTriangle className="h-8 w-8 text-yellow-500" />
+                                </div>
                             </div>
-                            <div className="p-4 bg-red-50 rounded-lg">
-                                <p className="text-sm text-red-600">Out of Stock</p>
-                                <p className="text-2xl font-bold text-gray-900">38</p>
+                            <div className="p-4 bg-red-50 rounded-lg border border-red-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-red-600 font-medium">Out of Stock</p>
+                                        <p className="text-2xl font-bold text-gray-900">89</p>
+                                    </div>
+                                    <X className="h-8 w-8 text-red-500" />
+                                </div>
                             </div>
                         </div>
 
@@ -1160,7 +1257,68 @@ const AdminDashboard = () => {
             case 'manual-request':
                 return (
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-6">Manual Request</h2>
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                            <div className="flex items-center space-x-3">
+                                <FileText className="h-8 w-8 text-blue-600" />
+                                <h2 className="text-2xl font-bold text-gray-900">Manual Request</h2>
+                            </div>
+                            <div className="flex gap-2">
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search requests..."
+                                        value={searchQueries.manualRequest}
+                                        onChange={(e) => handleSearchChange('manualRequest', e.target.value)}
+                                        className="pl-10 pr-4 py-2 bg-gray-100 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm w-full text-gray-900 placeholder-gray-500"
+                                    />
+                                </div>
+                                <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                                    <Plus className="h-4 w-4" />
+                                    <span>New Request</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Request Stats */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                            <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-blue-600 font-medium">Total Requests</p>
+                                        <p className="text-2xl font-bold text-gray-900">142</p>
+                                    </div>
+                                    <FileText className="h-8 w-8 text-blue-500" />
+                                </div>
+                            </div>
+                            <div className="p-4 bg-green-50 rounded-lg border border-green-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-green-600 font-medium">Completed</p>
+                                        <p className="text-2xl font-bold text-gray-900">89</p>
+                                    </div>
+                                    <Check className="h-8 w-8 text-green-500" />
+                                </div>
+                            </div>
+                            <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-yellow-600 font-medium">Pending</p>
+                                        <p className="text-2xl font-bold text-gray-900">38</p>
+                                    </div>
+                                    <Clock className="h-8 w-8 text-yellow-500" />
+                                </div>
+                            </div>
+                            <div className="p-4 bg-red-50 rounded-lg border border-red-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-red-600 font-medium">Urgent</p>
+                                        <p className="text-2xl font-bold text-gray-900">15</p>
+                                    </div>
+                                    <AlertTriangle className="h-8 w-8 text-red-500" />
+                                </div>
+                            </div>
+                        </div>
 
                         {/* Form Grid */}
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -1321,6 +1479,1090 @@ const AdminDashboard = () => {
                                         View All Requests
                                     </button>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            case 'purchases':
+                return (
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                            <div className="flex items-center space-x-3">
+                                <ShoppingBag className="h-8 w-8 text-blue-600" />
+                                <h2 className="text-2xl font-bold text-gray-900">Purchase Management</h2>
+                            </div>
+                            <div className="flex flex-wrap gap-3">
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search purchases..."
+                                        value={searchQueries.purchases}
+                                        onChange={(e) => handleSearchChange('purchases', e.target.value)}
+                                        className="pl-10 pr-4 py-2 bg-gray-100 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm w-64 text-gray-900 placeholder-gray-500"
+                                    />
+                                </div>
+                                <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg flex items-center space-x-2">
+                                    <Filter className="h-4 w-4" />
+                                    <span>Filter</span>
+                                </button>
+                                <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                                    <Plus className="h-4 w-4" />
+                                    <span>New Purchase</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Purchase Stats */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                            <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-blue-600 font-medium">Total Purchases</p>
+                                        <p className="text-2xl font-bold text-gray-900">1,783</p>
+                                    </div>
+                                    <ShoppingBag className="h-8 w-8 text-blue-500" />
+                                </div>
+                            </div>
+                            <div className="p-4 bg-green-50 rounded-lg border border-green-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-green-600 font-medium">Completed</p>
+                                        <p className="text-2xl font-bold text-gray-900">1,521</p>
+                                    </div>
+                                    <Check className="h-8 w-8 text-green-500" />
+                                </div>
+                            </div>
+                            <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-yellow-600 font-medium">Pending</p>
+                                        <p className="text-2xl font-bold text-gray-900">187</p>
+                                    </div>
+                                    <Clock className="h-8 w-8 text-yellow-500" />
+                                </div>
+                            </div>
+                            <div className="p-4 bg-purple-50 rounded-lg border border-purple-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-purple-600 font-medium">Total Value</p>
+                                        <p className="text-2xl font-bold text-gray-900">$3.6M</p>
+                                    </div>
+                                    <DollarSign className="h-8 w-8 text-purple-500" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Purchase Table */}
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Purchase ID
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Supplier
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Items
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Value
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Date
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Status
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Actions
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {[
+                                        { id: 'PUR-001', supplier: 'Medical Supplies Co.', items: 'Surgical Equipment', value: '$12,450', date: '2025-08-05', status: 'Completed' },
+                                        { id: 'PUR-002', supplier: 'Healthcare Products Ltd', items: 'Diagnostic Tools', value: '$8,320', date: '2025-08-03', status: 'Pending' },
+                                        { id: 'PUR-003', supplier: 'Surgical Instruments Inc', items: 'Surgical Kits', value: '$15,780', date: '2025-08-01', status: 'Completed' },
+                                        { id: 'PUR-004', supplier: 'MediTech Global', items: 'Monitoring Equipment', value: '$23,150', date: '2025-07-28', status: 'Completed' },
+                                        { id: 'PUR-005', supplier: 'Healthcare Innovations', items: 'Surgical Instruments', value: '$9,870', date: '2025-07-25', status: 'Processing' }
+                                    ].filter(purchase =>
+                                        searchQueries.purchases === '' ||
+                                        purchase.id.toLowerCase().includes(searchQueries.purchases.toLowerCase()) ||
+                                        purchase.supplier.toLowerCase().includes(searchQueries.purchases.toLowerCase()) ||
+                                        purchase.items.toLowerCase().includes(searchQueries.purchases.toLowerCase())
+                                    ).map((purchase, index) => (
+                                        <tr key={index} className="hover:bg-gray-50">
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm font-medium text-blue-600">{purchase.id}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm font-medium text-gray-900">{purchase.supplier}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm text-gray-900">{purchase.items}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm font-semibold text-gray-900">{purchase.value}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm text-gray-700">{purchase.date}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${purchase.status === 'Completed' ? 'bg-green-100 text-green-800' :
+                                                    purchase.status === 'Processing' ? 'bg-blue-100 text-blue-800' :
+                                                        'bg-yellow-100 text-yellow-800'
+                                                    }`}>
+                                                    {purchase.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <div className="flex justify-end space-x-2">
+                                                    <button className="text-blue-600 hover:text-blue-900">
+                                                        <Eye className="h-4 w-4" />
+                                                    </button>
+                                                    <button className="text-gray-600 hover:text-gray-900">
+                                                        <Download className="h-4 w-4" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Pagination */}
+                        <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
+                            <div className="text-sm text-gray-600">
+                                Showing 1 to 5 of 24 purchases
+                            </div>
+                            <div className="flex space-x-2">
+                                <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">Previous</button>
+                                <button className="px-3 py-1 bg-blue-600 text-white rounded-md">1</button>
+                                <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">2</button>
+                                <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">3</button>
+                                <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">Next</button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            case 'quotation':
+                return (
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                            <div className="flex items-center space-x-3">
+                                <FileText className="h-8 w-8 text-indigo-600" />
+                                <h2 className="text-2xl font-bold text-gray-900">Quotation Management</h2>
+                            </div>
+                            <div className="flex flex-wrap gap-3">
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search quotations..."
+                                        value={searchQueries.quotation}
+                                        onChange={(e) => handleSearchChange('quotation', e.target.value)}
+                                        className="pl-10 pr-4 py-2 bg-gray-100 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm w-64 text-gray-900 placeholder-gray-500"
+                                    />
+                                </div>
+                                <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg flex items-center space-x-2">
+                                    <Filter className="h-4 w-4" />
+                                    <span>Filter</span>
+                                </button>
+                                <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                                    <Plus className="h-4 w-4" />
+                                    <span>Create Quotation</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Quotation Stats */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                            <div className="p-4 bg-indigo-50 rounded-lg border border-indigo-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-indigo-600 font-medium">Total Quotations</p>
+                                        <p className="text-2xl font-bold text-gray-900">532</p>
+                                    </div>
+                                    <FileText className="h-8 w-8 text-indigo-500" />
+                                </div>
+                            </div>
+                            <div className="p-4 bg-green-50 rounded-lg border border-green-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-green-600 font-medium">Accepted</p>
+                                        <p className="text-2xl font-bold text-gray-900">289</p>
+                                    </div>
+                                    <CheckCircle className="h-8 w-8 text-green-500" />
+                                </div>
+                            </div>
+                            <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-yellow-600 font-medium">Pending</p>
+                                        <p className="text-2xl font-bold text-gray-900">158</p>
+                                    </div>
+                                    <Clock className="h-8 w-8 text-yellow-500" />
+                                </div>
+                            </div>
+                            <div className="p-4 bg-red-50 rounded-lg border border-red-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-red-600 font-medium">Rejected</p>
+                                        <p className="text-2xl font-bold text-gray-900">85</p>
+                                    </div>
+                                    <XCircle className="h-8 w-8 text-red-500" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Quotation Table */}
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Quote ID
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Customer
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Products
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Total
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Date
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Status
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Actions
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {[
+                                        { id: 'QT-001', customer: 'Memorial Hospital', products: 'Surgical Implants', total: '$8,750', date: '2025-08-06', status: 'Pending' },
+                                        { id: 'QT-002', customer: 'City Medical Center', products: 'Orthopedic Tools', total: '$12,320', date: '2025-08-05', status: 'Accepted' },
+                                        { id: 'QT-003', customer: 'Regional Healthcare', products: 'Surgical Equipment', total: '$24,150', date: '2025-08-04', status: 'Accepted' },
+                                        { id: 'QT-004', customer: 'University Hospital', products: 'Diagnostic Kits', total: '$9,870', date: '2025-08-02', status: 'Rejected' },
+                                        { id: 'QT-005', customer: 'Private Clinic Group', products: 'Surgical Tools', total: '$16,530', date: '2025-08-01', status: 'Pending' }
+                                    ].filter(quote =>
+                                        searchQueries.quotation === '' ||
+                                        quote.id.toLowerCase().includes(searchQueries.quotation.toLowerCase()) ||
+                                        quote.customer.toLowerCase().includes(searchQueries.quotation.toLowerCase()) ||
+                                        quote.products.toLowerCase().includes(searchQueries.quotation.toLowerCase())
+                                    ).map((quote, index) => (
+                                        <tr key={index} className="hover:bg-gray-50">
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm font-medium text-indigo-600">{quote.id}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm font-medium text-gray-900">{quote.customer}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm text-gray-900">{quote.products}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm font-semibold text-gray-900">{quote.total}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm text-gray-700">{quote.date}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${quote.status === 'Accepted' ? 'bg-green-100 text-green-800' :
+                                                    quote.status === 'Rejected' ? 'bg-red-100 text-red-800' :
+                                                        'bg-yellow-100 text-yellow-800'
+                                                    }`}>
+                                                    {quote.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <div className="flex justify-end space-x-2">
+                                                    <button className="text-indigo-600 hover:text-indigo-900">
+                                                        <Eye className="h-4 w-4" />
+                                                    </button>
+                                                    <button className="text-green-600 hover:text-green-900">
+                                                        <Printer className="h-4 w-4" />
+                                                    </button>
+                                                    <button className="text-gray-600 hover:text-gray-900">
+                                                        <Download className="h-4 w-4" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Pagination */}
+                        <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
+                            <div className="text-sm text-gray-600">
+                                Showing 1 to 5 of 532 quotations
+                            </div>
+                            <div className="flex space-x-2">
+                                <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">Previous</button>
+                                <button className="px-3 py-1 bg-indigo-600 text-white rounded-md">1</button>
+                                <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">2</button>
+                                <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">3</button>
+                                <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">Next</button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            case 'transactions':
+                return (
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                            <div className="flex items-center space-x-3">
+                                <RefreshCw className="h-8 w-8 text-teal-600" />
+                                <h2 className="text-2xl font-bold text-gray-900">Transaction History</h2>
+                            </div>
+                            <div className="flex flex-wrap gap-3">
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search transactions..."
+                                        value={searchQueries.transactions}
+                                        onChange={(e) => handleSearchChange('transactions', e.target.value)}
+                                        className="pl-10 pr-4 py-2 bg-gray-100 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm w-64 text-gray-900 placeholder-gray-500"
+                                    />
+                                </div>
+                                <div className="relative">
+                                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                                    <input
+                                        type="date"
+                                        className="pl-10 pr-4 py-2 bg-gray-100 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm text-gray-900"
+                                    />
+                                </div>
+                                <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg flex items-center space-x-2">
+                                    <Filter className="h-4 w-4" />
+                                    <span>Filter</span>
+                                </button>
+                                <button className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                                    <Download className="h-4 w-4" />
+                                    <span>Export</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Transaction Stats */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            <div className="p-4 bg-teal-50 rounded-lg border border-teal-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-teal-600 font-medium">Total Transactions</p>
+                                        <p className="text-2xl font-bold text-gray-900">3,476</p>
+                                    </div>
+                                    <RefreshCw className="h-8 w-8 text-teal-500" />
+                                </div>
+                            </div>
+                            <div className="p-4 bg-green-50 rounded-lg border border-green-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-green-600 font-medium">Income</p>
+                                        <div className="flex items-center">
+                                            <p className="text-2xl font-bold text-gray-900">$852,430</p>
+                                            <span className="ml-2 flex items-center text-green-600 text-xs">
+                                                <ArrowUpRight className="h-3 w-3 mr-1" />
+                                                5.3%
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <ArrowUpRight className="h-8 w-8 text-green-500" />
+                                </div>
+                            </div>
+                            <div className="p-4 bg-red-50 rounded-lg border border-red-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-red-600 font-medium">Expenses</p>
+                                        <div className="flex items-center">
+                                            <p className="text-2xl font-bold text-gray-900">$268,720</p>
+                                            <span className="ml-2 flex items-center text-red-600 text-xs">
+                                                <ArrowDownRight className="h-3 w-3 mr-1" />
+                                                2.8%
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <ArrowDownRight className="h-8 w-8 text-red-500" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Transaction Table */}
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Transaction ID
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Date
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Description
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Category
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Amount
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Status
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Actions
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {[
+                                        {
+                                            id: 'TRX-001',
+                                            date: '2025-08-06 09:32 AM',
+                                            description: 'Order payment from City Medical Center',
+                                            category: 'Sales',
+                                            amount: '+$12,560.00',
+                                            type: 'income',
+                                            status: 'Completed'
+                                        },
+                                        {
+                                            id: 'TRX-002',
+                                            date: '2025-08-05 11:15 AM',
+                                            description: 'Supplier payment to MedSupplies Inc.',
+                                            category: 'Purchase',
+                                            amount: '-$8,750.00',
+                                            type: 'expense',
+                                            status: 'Completed'
+                                        },
+                                        {
+                                            id: 'TRX-003',
+                                            date: '2025-08-04 03:45 PM',
+                                            description: 'Order payment from Regional Hospital',
+                                            category: 'Sales',
+                                            amount: '+$23,450.00',
+                                            type: 'income',
+                                            status: 'Completed'
+                                        },
+                                        {
+                                            id: 'TRX-004',
+                                            date: '2025-08-03 02:20 PM',
+                                            description: 'Monthly office rent payment',
+                                            category: 'Expense',
+                                            amount: '-$3,500.00',
+                                            type: 'expense',
+                                            status: 'Completed'
+                                        },
+                                        {
+                                            id: 'TRX-005',
+                                            date: '2025-08-02 10:10 AM',
+                                            description: 'Refund to Memorial Hospital',
+                                            category: 'Refund',
+                                            amount: '-$4,200.00',
+                                            type: 'expense',
+                                            status: 'Processing'
+                                        }
+                                    ].filter(transaction =>
+                                        searchQueries.transactions === '' ||
+                                        transaction.id.toLowerCase().includes(searchQueries.transactions.toLowerCase()) ||
+                                        transaction.description.toLowerCase().includes(searchQueries.transactions.toLowerCase()) ||
+                                        transaction.category.toLowerCase().includes(searchQueries.transactions.toLowerCase())
+                                    ).map((transaction, index) => (
+                                        <tr key={index} className="hover:bg-gray-50">
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm font-medium text-teal-600">{transaction.id}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm text-gray-700">{transaction.date}</div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="text-sm text-gray-900">{transaction.description}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${transaction.category === 'Sales' ? 'bg-blue-100 text-blue-800' :
+                                                    transaction.category === 'Purchase' ? 'bg-purple-100 text-purple-800' :
+                                                        transaction.category === 'Refund' ? 'bg-orange-100 text-orange-800' :
+                                                            'bg-red-100 text-red-800'
+                                                    }`}>
+                                                    {transaction.category}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className={`text-sm font-semibold ${transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+                                                    }`}>{transaction.amount}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${transaction.status === 'Completed' ? 'bg-green-100 text-green-800' :
+                                                    'bg-yellow-100 text-yellow-800'
+                                                    }`}>
+                                                    {transaction.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <div className="flex justify-end space-x-2">
+                                                    <button className="text-teal-600 hover:text-teal-900">
+                                                        <Eye className="h-4 w-4" />
+                                                    </button>
+                                                    <button className="text-gray-600 hover:text-gray-900">
+                                                        <Printer className="h-4 w-4" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Pagination */}
+                        <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
+                            <div className="text-sm text-gray-600">
+                                Showing 1 to 5 of 3,476 transactions
+                            </div>
+                            <div className="flex space-x-2">
+                                <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">Previous</button>
+                                <button className="px-3 py-1 bg-teal-600 text-white rounded-md">1</button>
+                                <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">2</button>
+                                <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">3</button>
+                                <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">Next</button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            case 'payments':
+                return (
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                            <div className="flex items-center space-x-3">
+                                <CreditCard className="h-8 w-8 text-violet-600" />
+                                <h2 className="text-2xl font-bold text-gray-900">Payment Management</h2>
+                            </div>
+                            <div className="flex flex-wrap gap-3">
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search payments..."
+                                        value={searchQueries.payments}
+                                        onChange={(e) => handleSearchChange('payments', e.target.value)}
+                                        className="pl-10 pr-4 py-2 bg-gray-100 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm w-64 text-gray-900 placeholder-gray-500"
+                                    />
+                                </div>
+                                <div className="relative">
+                                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                                    <input
+                                        type="date"
+                                        className="pl-10 pr-4 py-2 bg-gray-100 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm text-gray-900"
+                                    />
+                                </div>
+                                <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg flex items-center space-x-2">
+                                    <Filter className="h-4 w-4" />
+                                    <span>Filter</span>
+                                </button>
+                                <button className="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                                    <Plus className="h-4 w-4" />
+                                    <span>Record Payment</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Payment Stats */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                            <div className="p-4 bg-violet-50 rounded-lg border border-violet-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-violet-600 font-medium">Total Payments</p>
+                                        <p className="text-2xl font-bold text-gray-900">2,456</p>
+                                    </div>
+                                    <CreditCard className="h-8 w-8 text-violet-500" />
+                                </div>
+                            </div>
+                            <div className="p-4 bg-green-50 rounded-lg border border-green-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-green-600 font-medium">Received</p>
+                                        <p className="text-2xl font-bold text-gray-900">$683,240</p>
+                                    </div>
+                                    <Check className="h-8 w-8 text-green-500" />
+                                </div>
+                            </div>
+                            <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-yellow-600 font-medium">Pending</p>
+                                        <p className="text-2xl font-bold text-gray-900">$124,590</p>
+                                    </div>
+                                    <Clock className="h-8 w-8 text-yellow-500" />
+                                </div>
+                            </div>
+                            <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-blue-600 font-medium">Overdue</p>
+                                        <p className="text-2xl font-bold text-gray-900">$42,780</p>
+                                    </div>
+                                    <AlertTriangle className="h-8 w-8 text-blue-500" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Payment Table */}
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Payment ID
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Customer
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Order ID
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Amount
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Payment Method
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Date
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Status
+                                        </th>
+                                        <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Actions
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {[
+                                        {
+                                            id: 'PAY-001',
+                                            customer: 'Memorial Hospital',
+                                            orderId: 'ORD-245',
+                                            amount: '$12,450.00',
+                                            method: 'Bank Transfer',
+                                            date: '2025-08-06',
+                                            status: 'Completed'
+                                        },
+                                        {
+                                            id: 'PAY-002',
+                                            customer: 'City Medical Center',
+                                            orderId: 'ORD-233',
+                                            amount: '$8,790.00',
+                                            method: 'Credit Card',
+                                            date: '2025-08-05',
+                                            status: 'Completed'
+                                        },
+                                        {
+                                            id: 'PAY-003',
+                                            customer: 'Regional Healthcare',
+                                            orderId: 'ORD-227',
+                                            amount: '$15,320.00',
+                                            method: 'Bank Transfer',
+                                            date: '2025-08-03',
+                                            status: 'Pending'
+                                        },
+                                        {
+                                            id: 'PAY-004',
+                                            customer: 'University Hospital',
+                                            orderId: 'ORD-219',
+                                            amount: '$23,150.00',
+                                            method: 'Bank Transfer',
+                                            date: '2025-08-01',
+                                            status: 'Pending'
+                                        },
+                                        {
+                                            id: 'PAY-005',
+                                            customer: 'Private Clinic Group',
+                                            orderId: 'ORD-210',
+                                            amount: '$7,850.00',
+                                            method: 'Credit Card',
+                                            date: '2025-07-29',
+                                            status: 'Failed'
+                                        }
+                                    ].filter(payment =>
+                                        searchQueries.payments === '' ||
+                                        payment.id.toLowerCase().includes(searchQueries.payments.toLowerCase()) ||
+                                        payment.customer.toLowerCase().includes(searchQueries.payments.toLowerCase()) ||
+                                        payment.orderId.toLowerCase().includes(searchQueries.payments.toLowerCase()) ||
+                                        payment.method.toLowerCase().includes(searchQueries.payments.toLowerCase())
+                                    ).map((payment, index) => (
+                                        <tr key={index} className="hover:bg-gray-50">
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm font-medium text-violet-600">{payment.id}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm font-medium text-gray-900">{payment.customer}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm text-blue-600">{payment.orderId}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm font-semibold text-gray-900">{payment.amount}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm text-gray-700">{payment.method}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm text-gray-700">{payment.date}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${payment.status === 'Completed' ? 'bg-green-100 text-green-800' :
+                                                    payment.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                                                        'bg-red-100 text-red-800'
+                                                    }`}>
+                                                    {payment.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <div className="flex justify-end space-x-2">
+                                                    <button className="text-violet-600 hover:text-violet-900">
+                                                        <Eye className="h-4 w-4" />
+                                                    </button>
+                                                    <button className="text-gray-600 hover:text-gray-900">
+                                                        <Printer className="h-4 w-4" />
+                                                    </button>
+                                                    <button className="text-gray-600 hover:text-gray-900">
+                                                        <Download className="h-4 w-4" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Pagination */}
+                        <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
+                            <div className="text-sm text-gray-600">
+                                Showing 1 to 5 of 2,456 payments
+                            </div>
+                            <div className="flex space-x-2">
+                                <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">Previous</button>
+                                <button className="px-3 py-1 bg-violet-600 text-white rounded-md">1</button>
+                                <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">2</button>
+                                <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">3</button>
+                                <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">Next</button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            case 'reports':
+                return (
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                            <div className="flex items-center space-x-3">
+                                <FileBarChart className="h-8 w-8 text-emerald-600" />
+                                <h2 className="text-2xl font-bold text-gray-900">Analytics & Reports</h2>
+                            </div>
+                            <div className="flex flex-wrap gap-3">
+                                <div className="relative">
+                                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                                    <input
+                                        type="date"
+                                        className="pl-10 pr-4 py-2 bg-gray-100 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm text-gray-900"
+                                    />
+                                </div>
+                                <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg flex items-center space-x-2">
+                                    <Filter className="h-4 w-4" />
+                                    <span>Filter</span>
+                                </button>
+                                <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+                                    <Download className="h-4 w-4" />
+                                    <span>Export Reports</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Report Navigation Tabs */}
+                        <div className="mb-6 border-b border-gray-200">
+                            <div className="flex space-x-6">
+                                <button className="px-2 py-3 border-b-2 border-emerald-600 font-medium text-emerald-600">
+                                    Sales Report
+                                </button>
+                                <button className="px-2 py-3 text-gray-600 hover:text-gray-900">
+                                    Inventory Report
+                                </button>
+                                <button className="px-2 py-3 text-gray-600 hover:text-gray-900">
+                                    Financial Report
+                                </button>
+                                <button className="px-2 py-3 text-gray-600 hover:text-gray-900">
+                                    Customer Insights
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Report Summary */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                            <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-emerald-600 font-medium">Total Sales</p>
+                                        <p className="text-2xl font-bold text-gray-900">$1.24M</p>
+                                    </div>
+                                    <div className="p-2 bg-emerald-100 rounded-lg">
+                                        <TrendingUp className="h-6 w-6 text-emerald-600" />
+                                    </div>
+                                </div>
+                                <div className="mt-2 flex items-center text-sm">
+                                    <ArrowUpRight className="h-3 w-3 text-emerald-600 mr-1" />
+                                    <span className="text-emerald-600 font-medium">12.5%</span>
+                                    <span className="text-gray-600 ml-1">vs last month</span>
+                                </div>
+                            </div>
+                            <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-blue-600 font-medium">Orders</p>
+                                        <p className="text-2xl font-bold text-gray-900">846</p>
+                                    </div>
+                                    <div className="p-2 bg-blue-100 rounded-lg">
+                                        <ShoppingCart className="h-6 w-6 text-blue-600" />
+                                    </div>
+                                </div>
+                                <div className="mt-2 flex items-center text-sm">
+                                    <ArrowUpRight className="h-3 w-3 text-blue-600 mr-1" />
+                                    <span className="text-blue-600 font-medium">8.2%</span>
+                                    <span className="text-gray-600 ml-1">vs last month</span>
+                                </div>
+                            </div>
+                            <div className="p-4 bg-purple-50 rounded-lg border border-purple-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-purple-600 font-medium">Avg. Order Value</p>
+                                        <p className="text-2xl font-bold text-gray-900">$1,465</p>
+                                    </div>
+                                    <div className="p-2 bg-purple-100 rounded-lg">
+                                        <DollarSign className="h-6 w-6 text-purple-600" />
+                                    </div>
+                                </div>
+                                <div className="mt-2 flex items-center text-sm">
+                                    <ArrowUpRight className="h-3 w-3 text-purple-600 mr-1" />
+                                    <span className="text-purple-600 font-medium">4.3%</span>
+                                    <span className="text-gray-600 ml-1">vs last month</span>
+                                </div>
+                            </div>
+                            <div className="p-4 bg-orange-50 rounded-lg border border-orange-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-orange-600 font-medium">Active Customers</p>
+                                        <p className="text-2xl font-bold text-gray-900">194</p>
+                                    </div>
+                                    <div className="p-2 bg-orange-100 rounded-lg">
+                                        <Users className="h-6 w-6 text-orange-600" />
+                                    </div>
+                                </div>
+                                <div className="mt-2 flex items-center text-sm">
+                                    <ArrowUpRight className="h-3 w-3 text-orange-600 mr-1" />
+                                    <span className="text-orange-600 font-medium">6.8%</span>
+                                    <span className="text-gray-600 ml-1">vs last month</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Sales Graph */}
+                        <div className="mb-6 bg-gray-50 rounded-lg p-6 border border-gray-100">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="font-semibold text-gray-900">Monthly Sales Trend</h3>
+                                <div className="flex space-x-2">
+                                    <button className="px-3 py-1 text-xs bg-emerald-100 text-emerald-700 rounded-full">2025</button>
+                                    <button className="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-full">2024</button>
+                                </div>
+                            </div>
+                            <div className="h-80 flex items-end space-x-4 mt-4 pt-10 border-t border-l border-gray-200 relative">
+                                {/* Y-Axis Labels */}
+                                <div className="absolute left-0 top-0 h-full flex flex-col justify-between py-2 text-xs text-gray-600">
+                                    <span>$200K</span>
+                                    <span>$150K</span>
+                                    <span>$100K</span>
+                                    <span>$50K</span>
+                                    <span>$0</span>
+                                </div>
+
+                                {/* X-Axis with Bars */}
+                                <div className="flex-1 flex items-end justify-around pl-10">
+                                    {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"].map((month, index) => (
+                                        <div key={index} className="flex flex-col items-center">
+                                            <div className="w-12 bg-gradient-to-t from-emerald-500 to-emerald-300 rounded-t-sm"
+                                                style={{
+                                                    height: `${[60, 85, 70, 95, 110, 130, 125, 140][index]}%`,
+                                                    maxHeight: "90%"
+                                                }}>
+                                            </div>
+                                            <span className="mt-2 text-xs font-medium text-gray-600">{month}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Product Performance */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div className="bg-white rounded-lg border border-gray-100 p-5">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="font-semibold text-gray-900">Top Selling Products</h3>
+                                    <button className="text-sm text-emerald-600">View All</button>
+                                </div>
+                                <div className="space-y-3">
+                                    {[
+                                        { name: "Surgical Instruments Kit A", sales: 185, growth: "+12%", amount: "$56,200" },
+                                        { name: "Advanced Monitoring System", sales: 120, growth: "+8%", amount: "$43,800" },
+                                        { name: "Diagnostic Equipment Set", sales: 95, growth: "+15%", amount: "$38,450" },
+                                        { name: "Orthopedic Implants", sales: 78, growth: "+5%", amount: "$32,760" },
+                                        { name: "Sterilization Equipment", sales: 64, growth: "+10%", amount: "$28,350" }
+                                    ].map((product, index) => (
+                                        <div key={index} className="flex justify-between items-center p-3 hover:bg-gray-50 rounded-lg">
+                                            <div>
+                                                <p className="font-medium text-gray-900">{product.name}</p>
+                                                <div className="flex items-center mt-1">
+                                                    <span className="text-xs text-gray-600">{product.sales} units</span>
+                                                    <span className="mx-2 text-gray-300">•</span>
+                                                    <span className="text-xs text-emerald-600">{product.growth}</span>
+                                                </div>
+                                            </div>
+                                            <span className="font-semibold text-gray-900">{product.amount}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="bg-white rounded-lg border border-gray-100 p-5">
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="font-semibold text-gray-900">Sales by Region</h3>
+                                    <button className="text-sm text-emerald-600">View All</button>
+                                </div>
+                                <div className="h-64 flex items-center justify-center">
+                                    {/* Simple donut chart */}
+                                    <div className="relative w-48 h-48">
+                                        <svg viewBox="0 0 36 36" className="w-full h-full">
+                                            <circle cx="18" cy="18" r="15.91549430918954" fill="transparent" stroke="#d1fae5" strokeWidth="3"></circle>
+                                            <circle cx="18" cy="18" r="15.91549430918954" fill="transparent" stroke="#10b981" strokeWidth="3" strokeDasharray="40 100" strokeDashoffset="25"></circle>
+                                            <circle cx="18" cy="18" r="15.91549430918954" fill="transparent" stroke="#3b82f6" strokeWidth="3" strokeDasharray="25 100" strokeDashoffset="85"></circle>
+                                            <circle cx="18" cy="18" r="15.91549430918954" fill="transparent" stroke="#8b5cf6" strokeWidth="3" strokeDasharray="15 100" strokeDashoffset="60"></circle>
+                                            <circle cx="18" cy="18" r="15.91549430918954" fill="transparent" stroke="#f59e0b" strokeWidth="3" strokeDasharray="10 100" strokeDashoffset="45"></circle>
+                                        </svg>
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <span className="text-lg font-bold text-gray-900">$1.24M</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2 mt-4">
+                                    <div className="flex items-center space-x-2">
+                                        <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
+                                        <div>
+                                            <p className="text-xs font-medium text-gray-900">North (40%)</p>
+                                            <p className="text-xs text-gray-600">$496K</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                        <div>
+                                            <p className="text-xs font-medium text-gray-900">East (25%)</p>
+                                            <p className="text-xs text-gray-600">$310K</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                                        <div>
+                                            <p className="text-xs font-medium text-gray-900">South (15%)</p>
+                                            <p className="text-xs text-gray-600">$186K</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
+                                        <div>
+                                            <p className="text-xs font-medium text-gray-900">West (10%)</p>
+                                            <p className="text-xs text-gray-600">$124K</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Recent Sales Table */}
+                        <div className="bg-white rounded-lg border border-gray-100 overflow-hidden">
+                            <div className="p-5 border-b border-gray-100">
+                                <h3 className="font-semibold text-gray-900">Recent Sales</h3>
+                            </div>
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full divide-y divide-gray-200">
+                                    <thead className="bg-gray-50">
+                                        <tr>
+                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Order ID
+                                            </th>
+                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Customer
+                                            </th>
+                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Product
+                                            </th>
+                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Date
+                                            </th>
+                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Amount
+                                            </th>
+                                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Status
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                        {[
+                                            { id: "ORD-7865", customer: "Memorial Hospital", product: "Surgical Kits", date: "Aug 08, 2025", amount: "$12,580", status: "Completed" },
+                                            { id: "ORD-7864", customer: "City Medical Center", product: "Monitoring Systems", date: "Aug 07, 2025", amount: "$8,790", status: "Completed" },
+                                            { id: "ORD-7863", customer: "Regional Healthcare", product: "Diagnostic Equipment", date: "Aug 07, 2025", amount: "$15,450", status: "Processing" },
+                                            { id: "ORD-7862", customer: "University Hospital", product: "Sterilization Units", date: "Aug 06, 2025", amount: "$23,100", status: "Completed" },
+                                            { id: "ORD-7861", customer: "Private Clinic Group", product: "Surgical Instruments", date: "Aug 05, 2025", amount: "$6,720", status: "Processing" }
+                                        ].map((order, index) => (
+                                            <tr key={index}>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-sm font-medium text-blue-600">{order.id}</div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-sm text-gray-900">{order.customer}</div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-sm text-gray-700">{order.product}</div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-sm text-gray-700">{order.date}</div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-sm font-semibold text-gray-900">{order.amount}</div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${order.status === 'Completed' ? 'bg-green-100 text-green-800' :
+                                                            'bg-yellow-100 text-yellow-800'
+                                                        }`}>
+                                                        {order.status}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div className="p-4 border-t border-gray-100 flex justify-center">
+                                <button className="text-sm text-emerald-600 font-medium hover:text-emerald-700">
+                                    View All Sales Reports
+                                </button>
                             </div>
                         </div>
                     </div>
