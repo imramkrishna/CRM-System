@@ -50,6 +50,8 @@ const DistributorDashboard = () => {
 
     // Search states for different sections
     const [searchQueries, setSearchQueries] = useState({
+        global: '',
+        dashboard: '',
         products: '',
         orders: '',
         transactions: ''
@@ -92,8 +94,9 @@ const DistributorDashboard = () => {
             trend: 'up',
             icon: ShoppingCart,
             color: 'blue',
-            bgColor: 'bg-blue-50',
-            iconColor: 'text-blue-600'
+            bgGradient: 'bg-gradient-to-r from-blue-600 to-indigo-700',
+            iconColor: 'text-white',
+            chartColor: 'text-blue-200'
         },
         {
             title: 'Available Products',
@@ -102,8 +105,9 @@ const DistributorDashboard = () => {
             trend: 'up',
             icon: Package,
             color: 'green',
-            bgColor: 'bg-green-50',
-            iconColor: 'text-green-600'
+            bgGradient: 'bg-gradient-to-r from-emerald-500 to-green-600',
+            iconColor: 'text-white',
+            chartColor: 'text-emerald-200'
         },
         {
             title: 'Monthly Sales',
@@ -112,8 +116,9 @@ const DistributorDashboard = () => {
             trend: 'up',
             icon: DollarSign,
             color: 'purple',
-            bgColor: 'bg-purple-50',
-            iconColor: 'text-purple-600'
+            bgGradient: 'bg-gradient-to-r from-purple-600 to-indigo-700',
+            iconColor: 'text-white',
+            chartColor: 'text-purple-200'
         },
         {
             title: 'Performance',
@@ -122,8 +127,9 @@ const DistributorDashboard = () => {
             trend: 'up',
             icon: TrendingUp,
             color: 'orange',
-            bgColor: 'bg-orange-50',
-            iconColor: 'text-orange-600'
+            bgGradient: 'bg-gradient-to-r from-amber-500 to-orange-600',
+            iconColor: 'text-white',
+            chartColor: 'text-amber-200'
         }
     ];
 
@@ -172,27 +178,51 @@ const DistributorDashboard = () => {
     ];
 
     const renderDashboard = () => (
-        <div className="space-y-5">
+        <div className="space-y-6 bg-gray-50/50 p-5 rounded-2xl">
+            {/* Search */}
+            <div className="relative mb-6">
+                <div className="flex items-center">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+                    <input
+                        type="text"
+                        placeholder="Search in dashboard..."
+                        value={searchQueries['dashboard'] || ''}
+                        onChange={(e) => handleSearchChange('dashboard', e.target.value)}
+                        className="pl-10 pr-4 py-3 bg-white border border-gray-200 w-full rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm"
+                    />
+                </div>
+            </div>
+
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {stats.map((stat, index) => {
                     const Icon = stat.icon;
                     return (
-                        <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                        <div key={index} className={`${stat.bgGradient} rounded-xl shadow-md p-5 text-white relative overflow-hidden group`}>
+                            <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm font-medium text-gray-600 mb-1">{stat.title}</p>
-                                    <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+                                    <p className="text-sm font-medium text-white/80 mb-1">{stat.title}</p>
+                                    <p className="text-2xl font-bold text-white">{stat.value}</p>
                                     <div className="flex items-center mt-2">
-                                        <span className={`text-sm font-medium ${stat.trend === 'up' ? 'text-green-600' : 'text-red-600'
-                                            }`}>
+                                        <span className={`text-sm font-medium flex items-center ${stat.trend === 'up' ? 'text-green-200' : 'text-red-200'}`}>
+                                            {stat.trend === 'up' ? <ArrowUpRight className="h-3 w-3 mr-1" /> : <ArrowDownRight className="h-3 w-3 mr-1" />}
                                             {stat.change}
                                         </span>
                                     </div>
                                 </div>
-                                <div className={`${stat.bgColor} p-3 rounded-lg`}>
-                                    <Icon className={`h-6 w-6 ${stat.iconColor}`} />
+                                <div className="h-12 w-12 rounded-full bg-white/20 flex items-center justify-center">
+                                    <Icon className="h-6 w-6 text-white" />
                                 </div>
+                            </div>
+                            <div className="absolute right-1 bottom-0 opacity-70">
+                                <svg width="100" height="60" viewBox="0 0 100 60" fill="none" className={stat.chartColor}>
+                                    <path d="M0 50 C20 50, 20 30, 30 30 S40 20, 50 20 S60 30, 70 30 S80 20, 90 20 L90 50 Z" stroke="currentColor" strokeWidth="2" fill="none" />
+                                    <circle cx="30" cy="30" r="2" fill="currentColor" />
+                                    <circle cx="50" cy="20" r="2" fill="currentColor" />
+                                    <circle cx="70" cy="30" r="2" fill="currentColor" />
+                                    <circle cx="90" cy="20" r="2" fill="currentColor" />
+                                </svg>
                             </div>
                         </div>
                     );
@@ -202,25 +232,26 @@ const DistributorDashboard = () => {
             {/* Main Dashboard Content */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 {/* Recent Orders */}
-                <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100">
-                    <div className="p-5 border-b border-gray-100">
-                        <div className="flex items-center justify-between">
-                            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                                <ShoppingCart className="h-5 w-5 text-blue-600 mr-2" />
-                                Recent Orders
-                            </h3>
-                            <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                                View All
-                            </button>
+                <div className="lg:col-span-2 bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-md border border-gray-100 overflow-hidden">
+                    <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+                        <div className="flex items-center gap-2">
+                            <div className="p-2 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-md text-white shadow-sm">
+                                <ShoppingCart className="h-4 w-4" />
+                            </div>
+                            <h3 className="font-semibold text-gray-900">Recent Orders</h3>
                         </div>
+                        <button className="text-blue-600 hover:text-blue-700 font-medium flex items-center text-sm bg-blue-50 hover:bg-blue-100 transition-colors px-3 py-1.5 rounded-md">
+                            <span>View All</span>
+                            <ChevronDown className="h-4 w-4 ml-1" />
+                        </button>
                     </div>
                     <div className="p-5">
                         <div className="space-y-4">
                             {recentOrders.map((order, index) => (
-                                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div key={index} className="flex items-center justify-between p-4 hover:bg-blue-50/40 bg-white rounded-lg border border-gray-100 shadow-sm transition-all hover:shadow">
                                     <div className="flex items-center space-x-3">
-                                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                            <Package className="h-5 w-5 text-blue-600" />
+                                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-sm">
+                                            <Package className="h-5 w-5 text-white" />
                                         </div>
                                         <div>
                                             <p className="font-medium text-gray-900">Order #{order.id}</p>
@@ -230,9 +261,11 @@ const DistributorDashboard = () => {
                                     </div>
                                     <div className="text-right">
                                         <p className="font-semibold text-gray-900">{order.amount}</p>
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${order.status === 'delivered' ? 'bg-green-100 text-green-800' :
-                                            order.status === 'in-transit' ? 'bg-yellow-100 text-yellow-800' :
-                                                'bg-blue-100 text-blue-800'
+                                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium shadow-sm ${order.status === 'delivered'
+                                            ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white'
+                                            : order.status === 'in-transit'
+                                                ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-white'
+                                                : 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white'
                                             }`}>
                                             {order.status === 'delivered' && <CheckCircle className="h-3 w-3 mr-1" />}
                                             {order.status === 'in-transit' && <Clock className="h-3 w-3 mr-1" />}
@@ -247,31 +280,33 @@ const DistributorDashboard = () => {
                 </div>
 
                 {/* Quick Actions */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-                    <div className="p-5 border-b border-gray-100">
-                        <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                            <TrendingUp className="h-5 w-5 text-green-600 mr-2" />
-                            Quick Actions
-                        </h3>
+                <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-md border border-gray-100 overflow-hidden">
+                    <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+                        <div className="flex items-center gap-2">
+                            <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-md text-white shadow-sm">
+                                <TrendingUp className="h-4 w-4" />
+                            </div>
+                            <h3 className="font-semibold text-gray-900">Quick Actions</h3>
+                        </div>
                     </div>
                     <div className="p-5 space-y-3">
                         <button
                             onClick={() => setActiveSection('products')}
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                            className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2 shadow-sm hover:shadow"
                         >
                             <Package className="h-4 w-4" />
                             <span>Browse Products</span>
                         </button>
                         <button
                             onClick={() => setActiveSection('orders')}
-                            className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                            className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2 shadow-sm hover:shadow"
                         >
                             <ShoppingCart className="h-4 w-4" />
                             <span>Place New Order</span>
                         </button>
                         <button
                             onClick={() => setActiveSection('transaction-history')}
-                            className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                            className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2 shadow-sm hover:shadow"
                         >
                             <History className="h-4 w-4" />
                             <span>View History</span>
@@ -285,28 +320,32 @@ const DistributorDashboard = () => {
             </div>
 
             {/* Product Categories */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-                <div className="p-5 border-b border-gray-100">
-                    <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                        <Package className="h-5 w-5 text-blue-600 mr-2" />
-                        Product Categories
-                    </h3>
+            <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-md border border-gray-100 overflow-hidden">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+                    <div className="flex items-center gap-2">
+                        <div className="p-2 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-md text-white shadow-sm">
+                            <Package className="h-4 w-4" />
+                        </div>
+                        <h3 className="font-semibold text-gray-900">Product Categories</h3>
+                    </div>
                 </div>
                 <div className="p-5">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {productCategories.map((category, index) => (
-                            <div key={index} className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:bg-blue-50 cursor-pointer transition-all">
+                            <div key={index} className="bg-white border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-md cursor-pointer transition-all">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center space-x-3">
-                                        <div className="text-2xl">{category.icon}</div>
+                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center text-xl shadow-sm">
+                                            {category.icon}
+                                        </div>
                                         <div>
                                             <h4 className="font-medium text-gray-900">{category.name}</h4>
                                             <p className="text-sm text-gray-600">{category.count} total products</p>
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-lg font-bold text-green-600">{category.available}</p>
-                                        <p className="text-xs text-gray-500">Available</p>
+                                        <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-1 rounded-full text-lg font-bold">{category.available}</div>
+                                        <p className="text-xs text-gray-500 mt-1">Available</p>
                                     </div>
                                 </div>
                             </div>
@@ -316,27 +355,41 @@ const DistributorDashboard = () => {
             </div>
 
             {/* Performance Metrics */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-                <div className="p-5 border-b border-gray-100">
-                    <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                        <BarChart3 className="h-5 w-5 text-purple-600 mr-2" />
-                        Performance Metrics
-                    </h3>
+            <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-md border border-gray-100 overflow-hidden">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+                    <div className="flex items-center gap-2">
+                        <div className="p-2 bg-gradient-to-br from-purple-600 to-indigo-700 rounded-md text-white shadow-sm">
+                            <BarChart3 className="h-4 w-4" />
+                        </div>
+                        <h3 className="font-semibold text-gray-900">Performance Metrics</h3>
+                    </div>
+                    <div className="text-xs font-medium text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">
+                        This Month
+                    </div>
                 </div>
                 <div className="p-5">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="text-center p-4 bg-blue-50 rounded-lg">
-                            <div className="text-3xl font-bold text-blue-600 mb-2">98%</div>
+                        <div className="text-center p-5 rounded-xl shadow-sm border border-gray-100 bg-gradient-to-br from-blue-50 to-blue-100/30 hover:shadow-md transition-shadow">
+                            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white mb-3">
+                                <CheckCircle className="h-6 w-6" />
+                            </div>
+                            <div className="text-3xl font-bold text-blue-700 mb-2">98%</div>
                             <div className="text-sm font-medium text-gray-700">Order Accuracy</div>
                             <div className="text-xs text-gray-500 mt-1">Excellent performance</div>
                         </div>
-                        <div className="text-center p-4 bg-green-50 rounded-lg">
+                        <div className="text-center p-5 rounded-xl shadow-sm border border-gray-100 bg-gradient-to-br from-green-50 to-green-100/30 hover:shadow-md transition-shadow">
+                            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 text-white mb-3">
+                                <Clock className="h-6 w-6" />
+                            </div>
                             <div className="text-3xl font-bold text-green-600 mb-2">2.1</div>
                             <div className="text-sm font-medium text-gray-700">Avg. Delivery Days</div>
                             <div className="text-xs text-gray-500 mt-1">Faster than average</div>
                         </div>
-                        <div className="text-center p-4 bg-purple-50 rounded-lg">
-                            <div className="text-3xl font-bold text-purple-600 mb-2">4.8</div>
+                        <div className="text-center p-5 rounded-xl shadow-sm border border-gray-100 bg-gradient-to-br from-purple-50 to-purple-100/30 hover:shadow-md transition-shadow">
+                            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-purple-600 to-indigo-700 text-white mb-3">
+                                <Star className="h-6 w-6" />
+                            </div>
+                            <div className="text-3xl font-bold text-purple-700 mb-2">4.8</div>
                             <div className="text-sm font-medium text-gray-700">Customer Rating</div>
                             <div className="text-xs text-gray-500 mt-1">Outstanding service</div>
                         </div>
@@ -347,7 +400,7 @@ const DistributorDashboard = () => {
     );
 
     const renderOrders = () => (
-        <div className="space-y-5">
+        <div className="space-y-6 bg-gray-50/50 p-5 rounded-2xl">
             {/* Order Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg p-5 text-white">
@@ -593,7 +646,7 @@ const DistributorDashboard = () => {
     );
 
     const renderProducts = () => (
-        <div className="space-y-5">
+        <div className="space-y-6 bg-gray-50/50 p-5 rounded-2xl">
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                     <div className="flex items-center space-x-3">
@@ -773,7 +826,7 @@ const DistributorDashboard = () => {
     );
 
     const renderTransactionHistory = () => (
-        <div className="space-y-5">
+        <div className="space-y-6 bg-gray-50/50 p-5 rounded-2xl">
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                     <div className="flex items-center space-x-3">
@@ -988,17 +1041,17 @@ const DistributorDashboard = () => {
     return (
         <div className="min-h-screen bg-gray-50 flex">
             {/* Sidebar */}
-            <aside className={`fixed inset-y-0 left-0 z-50 w-56 bg-gradient-to-b from-slate-800 to-slate-900 border-r border-slate-700 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 transition-transform duration-300 ease-in-out shadow-xl`}>
+            <aside className={`fixed inset-y-0 left-0 z-50 w-56 bg-gradient-to-b from-slate-900 to-slate-950 border-r border-slate-800 transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 transition-transform duration-300 ease-in-out shadow-xl`}>
                 <div className="flex flex-col h-full">
                     {/* Sidebar Header - Logo */}
-                    <div className="flex items-center h-16 px-4 border-b border-slate-700">
+                    <div className="flex items-center h-20 px-4 border-b border-slate-800 bg-gradient-to-r from-slate-950 to-slate-900">
                         <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-md flex items-center justify-center text-white shadow-lg">
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-md flex items-center justify-center text-white shadow-lg border border-blue-400/20">
                                 <Package className="h-5 w-5" />
                             </div>
                             <div>
                                 <h1 className="font-bold text-base text-white">Harmony Surgitech</h1>
-                                <p className="text-xs text-slate-400">Distributor Portal</p>
+                                <p className="text-xs text-blue-300">Distributor Portal</p>
                             </div>
                         </div>
                         <button
@@ -1010,22 +1063,26 @@ const DistributorDashboard = () => {
                     </div>
 
                     {/* Nav Menu */}
-                    <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
+                    <nav className="flex-1 py-5 px-3 space-y-1.5 overflow-y-auto">
                         {menuItems.map((item) => {
                             const Icon = item.icon;
                             return (
                                 <button
                                     key={item.id}
                                     onClick={() => setActiveSection(item.id)}
-                                    className={`w-full flex items-center space-x-3 px-3 py-3 text-left rounded-lg transition-all duration-200 group ${activeSection === item.id
-                                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg transform scale-105'
-                                        : 'text-slate-300 hover:bg-slate-700 hover:text-white hover:transform hover:scale-105'
+                                    className={`w-full flex items-center px-3 py-2.5 text-left rounded-lg transition-all duration-200 group ${activeSection === item.id
+                                        ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
+                                        : 'text-slate-300 hover:bg-slate-800/60 hover:text-white'
                                         }`}
                                 >
-                                    <Icon className={`h-5 w-5 ${activeSection === item.id ? 'text-white' : 'text-slate-400 group-hover:text-white'}`} />
-                                    <span className="text-sm font-medium">{item.label}</span>
+                                    <div className={`${activeSection === item.id
+                                        ? 'bg-white/20 p-1.5 rounded mr-3'
+                                        : 'text-slate-400 group-hover:text-blue-400 p-1.5 rounded mr-3'}`}>
+                                        <Icon className="h-4 w-4" />
+                                    </div>
+                                    <span className={`text-sm ${activeSection === item.id ? 'font-medium' : ''}`}>{item.label}</span>
                                     {activeSection === item.id && (
-                                        <div className="ml-auto w-2 h-2 bg-white rounded-full"></div>
+                                        <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full"></div>
                                     )}
                                 </button>
                             );
@@ -1033,19 +1090,19 @@ const DistributorDashboard = () => {
                     </nav>
 
                     {/* Sidebar Footer */}
-                    <div className="px-3 py-3 border-t border-slate-700 mt-auto">
-                        <div className="flex items-center space-x-3 mb-3 p-2 rounded-lg bg-slate-700">
-                            <div className="w-9 h-9 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full flex items-center justify-center text-sm font-medium shadow-lg">
+                    <div className="px-3 py-4 border-t border-slate-800 mt-auto">
+                        <div className="flex items-center space-x-3 mb-3 p-2.5 rounded-lg bg-gradient-to-br from-slate-800 to-slate-900 shadow-inner border border-slate-700/50">
+                            <div className="w-9 h-9 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full flex items-center justify-center text-sm font-semibold shadow-lg border border-blue-400/20">
                                 {user?.name?.charAt(0) || 'D'}
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-white">{user?.name || 'Distributor'}</p>
-                                <p className="text-xs text-slate-400">Distributor</p>
+                                <p className="text-xs text-blue-300">Distributor Account</p>
                             </div>
                         </div>
                         <button
                             onClick={handleLogout}
-                            className="w-full flex items-center justify-center space-x-2 px-3 py-2 text-sm font-medium text-slate-300 hover:text-red-400 hover:bg-slate-700 rounded-lg transition-all duration-200 border border-slate-600 hover:border-red-400"
+                            className="w-full flex items-center justify-center space-x-2 px-3 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 rounded-lg transition-all duration-200 shadow-sm hover:shadow"
                         >
                             <LogOut className="h-4 w-4" />
                             <span>Logout</span>
@@ -1055,10 +1112,10 @@ const DistributorDashboard = () => {
             </aside>
 
             {/* Main Content */}
-            <div className="flex-1 md:ml-56 w-full min-h-screen">
+            <div className="flex-1 md:ml-56 md:pl-4 w-full min-h-screen">
                 {/* Header */}
-                <header className="bg-white border-b border-gray-100 sticky top-0 z-30 shadow-sm backdrop-blur-sm">
-                    <div className="flex items-center justify-between h-16 px-4">
+                <header className="border-b border-gray-100 sticky top-0 z-30 shadow-md backdrop-blur-sm bg-white/90">
+                    <div className="flex items-center justify-between h-16 px-6">
                         <div className="flex items-center space-x-3">
                             <button
                                 onClick={() => setSidebarOpen(true)}
@@ -1067,33 +1124,39 @@ const DistributorDashboard = () => {
                                 <Menu className="h-5 w-5" />
                             </button>
                             <h2 className="text-base sm:text-lg font-semibold text-gray-900 truncate flex items-center">
-                                <span className="w-1.5 h-5 bg-blue-600 rounded-sm mr-2 hidden sm:block"></span>
+                                <span className="w-1.5 h-6 bg-gradient-to-b from-blue-600 to-indigo-700 rounded-sm mr-2.5 hidden sm:block"></span>
                                 {menuItems.find(item => item.id === activeSection)?.label || 'Dashboard'}
                             </h2>
                         </div>
 
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-4">
                             <div className="relative hidden sm:block">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                                 <input
                                     type="text"
                                     placeholder="Search here..."
-                                    className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm w-56 text-gray-900 placeholder-gray-500"
+                                    value={searchQueries.global}
+                                    onChange={(e) => handleSearchChange('global', e.target.value)}
+                                    className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm w-64 shadow-sm"
                                 />
                             </div>
 
-                            <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors">
+                            <button className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors relative">
                                 <Search className="h-5 w-5 sm:hidden" />
                                 <Bell className="h-5 w-5 hidden sm:block" />
+                                <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
                             </button>
 
-                            <div className="flex items-center space-x-2 border-l pl-3 ml-1">
-                                <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-sm font-medium">
+                            <div className="flex items-center space-x-3 border-l pl-4 ml-1">
+                                <div className="w-9 h-9 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full flex items-center justify-center text-sm font-semibold shadow-sm border border-blue-400/20">
                                     {user?.name?.charAt(0) || 'D'}
                                 </div>
-                                <span className="hidden sm:inline text-sm font-medium text-gray-700">
-                                    {user?.name?.split(' ')[0] || 'Distributor'}
-                                </span>
+                                <div className="hidden sm:block">
+                                    <p className="text-sm font-medium text-gray-900 leading-tight">
+                                        {user?.name || 'Distributor'}
+                                    </p>
+                                    <p className="text-xs text-gray-500 leading-tight">Distributor</p>
+                                </div>
                                 <ChevronDown className="h-4 w-4 text-gray-500" />
                             </div>
                         </div>
@@ -1104,7 +1167,7 @@ const DistributorDashboard = () => {
                 <div className="h-4"></div>
 
                 {/* Page Content */}
-                <main className="p-5 bg-gray-50 min-h-[calc(100vh-5rem)]">
+                <main className="px-8 py-6 bg-gray-50 min-h-[calc(100vh-5rem)]">
                     {loading ? (
                         <div className="flex items-center justify-center h-64">
                             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
