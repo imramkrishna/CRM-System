@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAppDispatch } from '@/lib/hooks';
-import { loginStart, loginSuccess, loginFailure } from '@/lib/slices/authSlice';
-
+import { loginStart, loginSuccess, loginFailure, type User } from '@/lib/slices/authSlice';
+import axios from 'axios';
 interface LoginFormProps {
     type: 'admin' | 'distributor';
     title: string;
@@ -22,31 +22,46 @@ const LoginForm = ({ type, title, subtitle }: LoginFormProps) => {
 
     const dispatch = useAppDispatch();
     const router = useRouter();
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
         setError('');
-
         dispatch(loginStart());
 
         try {
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            // Mock authentication logic
-            if (email && password) {
-                const user = {
-                    id: '1',
+            setIsLoading(true)
+            if (type == "admin") {
+                const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/adminLogin`, {
                     email,
-                    name: type === 'admin' ? 'Admin User' : 'Distributor User',
-                    role: type as 'admin' | 'distributor'
+                    password
+                }, {
+                    withCredentials: true
+                });
+                const apiUser = response.data.user || {};
+                const normalizedUser: User = {
+                    id: apiUser.id ?? apiUser._id ?? 'unknown',
+                    email: apiUser.email ?? email,
+                    name: apiUser.name ?? apiUser.ownerName ?? 'Admin',
+                    role: 'admin',
                 };
-
-                dispatch(loginSuccess(user));
-                router.push(type === 'admin' ? '/admin' : '/distributor');
+                dispatch(loginSuccess(normalizedUser));
+                router.replace('/admin');
             } else {
-                throw new Error('Invalid credentials');
+                const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`, {
+                    email,
+                    password
+                }, {
+                    withCredentials: true
+                });
+                const apiUser = response.data.user || {};
+                const normalizedUser: User = {
+                    id: apiUser.id ?? apiUser._id ?? 'unknown',
+                    email: apiUser.email ?? email,
+                    name: apiUser.name ?? apiUser.ownerName ?? 'Distributor',
+                    role: 'distributor',
+                };
+                dispatch(loginSuccess(normalizedUser));
+                router.replace('/distributor');
             }
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Login failed';

@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { PrismaClient } from "@prisma/client";
 import { StatusCode } from '../../types';
 import bcrypt from "bcrypt"
+import { generateAccessToken, generateRefreshToken } from "../../utils/generateToken";
 
 const prisma = new PrismaClient();
 
@@ -30,9 +31,38 @@ const loginController = async (req: Request, res: Response): Promise<Response> =
         }
 
         // If login is successful, return a success response
-
-        return res.status(StatusCode.SUCCESS).json({ message: 'Login successful', user });
+        const refreshToken = await generateRefreshToken({ id: user.id, email: user.email, role: "distributor" });
+        console.log("RefreshToken:", refreshToken)
+        const accessToken = await generateAccessToken(refreshToken);
+        // Store the refresh token in the database
+        await prisma.distributorLoginSessions.upsert({
+            where: { distributorId: user.id },
+            update: { refreshToken },
+            create: { refreshToken, distributorId: user.id }
+        });
+        //setting both refresh and access token in cookies
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: false, // Use secure cookies in production
+            sameSite: 'lax', // Adjust as necessary for your application
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        });
+        res.cookie('accessToken', accessToken, {
+            httpOnly: true,
+            secure: false, // Use secure cookies in production
+            sameSite: 'lax', // Adjust as necessary for your application
+            maxAge: 10 * 1000 // 10 seconds
+            //15 * 60 * 1000 // 15 minutes
+        });
+        return res.status(StatusCode.SUCCESS).json({
+            message: 'Login successful', user: {
+                id: user.id,
+                email: user.email,
+                role: "distributor"
+            }
+        });
     } catch (error) {
+        console.log("Error during login:", error);
         return res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error' });
     }
 }

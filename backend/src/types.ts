@@ -9,8 +9,7 @@ export enum StatusCode {
     CONFLICT = 409
 }
 export interface User {
-    id: string;
-    name: string;
+    id: number;
     email: string;
-    role: 'admin' | 'distributor';
+    role:"admin" | "distributor"
 }

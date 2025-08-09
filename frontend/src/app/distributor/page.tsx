@@ -65,7 +65,7 @@ const DistributorDashboard = () => {
     };
 
     useEffect(() => {
-        if (!isAuthenticated || user?.role !== 'distributor') {
+        if (!isAuthenticated || user?.role != 'distributor') {
             router.push('/auth/distributor-login');
         }
     }, [isAuthenticated, user, router]);
