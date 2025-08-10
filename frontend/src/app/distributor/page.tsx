@@ -39,6 +39,7 @@ import {
     ArrowUpRight,
     ArrowDownRight
 } from 'lucide-react';
+import axios from 'axios';
 
 const DistributorDashboard = () => {
     const router = useRouter();
@@ -63,11 +64,26 @@ const DistributorDashboard = () => {
             [section]: value
         }));
     };
+    const fetchDashboard = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/distributor/dashboard`, {
+                withCredentials: true
+            });
+            console.log(response.data);
+        } catch (error) {
+            console.error("Error fetching dashboard data:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
         if (!isAuthenticated || user?.role != 'distributor') {
             router.push('/auth/distributor-login');
         }
+        fetchDashboard();
+
     }, [isAuthenticated, user, router]);
 
     const handleLogout = () => {

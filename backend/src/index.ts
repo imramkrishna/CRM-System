@@ -1,9 +1,11 @@
 import express from "express";
 import cors from "cors";
-import authRouter from "./routes/authRoutes";
-import profileRouter from "./routes/profileRoutes";
+import authRouter from "./routes/auth/authRoutes";
+import profileRouter from "./routes/auth/profileRoutes";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
+import adminRouter from "./routes/profile/adminRoutes";
+import distributorRouter from "./routes/profile/distributorRoutes";
 // Load environment variables from .env file
 dotenv.config();
 
@@ -21,6 +23,8 @@ app.use(cors({
 // Routes
 app.use("/auth", authRouter)
 app.use("/profile", profileRouter);
+app.use("/admin", adminRouter);
+app.use("/distributor", distributorRouter);
 
 // Basic route for testing
 app.get("/", (req, res) => {

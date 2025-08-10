@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppSelector, useAppDispatch } from '@/lib/hooks';
 import { logout } from '@/lib/slices/authSlice';
+import axios from "axios"
 // Theme imports removed
 import {
     LayoutDashboard,
@@ -87,11 +88,28 @@ const AdminDashboard = () => {
             [section]: value
         }));
     };
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            // Fetch data based on the active section and search queries
+            //adding withCredentials true for cross origin request
+            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/dashboard`, { withCredentials: true });
+            console.log(response.data);
+            // Handle the fetched data
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            router.push('/auth/admin-login');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
         if (!isAuthenticated || user?.role !== 'admin') {
             router.push('/auth/admin-login');
         }
+        fetchData();
+
     }, [isAuthenticated, user, router]);
 
     const handleLogout = () => {

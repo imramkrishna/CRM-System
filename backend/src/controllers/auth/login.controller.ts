@@ -51,7 +51,7 @@ const loginController = async (req: Request, res: Response): Promise<Response> =
             httpOnly: true,
             secure: false, // Use secure cookies in production
             sameSite: 'lax', // Adjust as necessary for your application
-            maxAge: 10 * 1000 // 10 seconds
+            maxAge: 40 * 1000 // 40 seconds
             //15 * 60 * 1000 // 15 minutes
         });
         return res.status(StatusCode.SUCCESS).json({

@@ -3,7 +3,8 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { StatusCode } from "../../types";
 import { User } from "../../types";
-
+import { generateAccessToken } from "../../utils/generateToken";
+import validateRefreshToken from "../../utils/validateRefreshToken";
 declare global {
     namespace Express {
         interface Request {
@@ -16,7 +17,27 @@ const checkAccessTokenMiddleware = async (req: Request, res: Response, next: Nex
     const accessToken = req.cookies.accessToken;
 
     if (!accessToken) {
-        return res.status(StatusCode.UNAUTHORIZED).json({ message: "Access token required" });
+        const refreshToken = req.cookies.refreshToken;
+        if (!refreshToken) {
+            return res.status(StatusCode.UNAUTHORIZED).json({ message: "Access token required", action: "login" });
+        }
+        // Handle refresh token logic here
+        try {
+            const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET!) as User;
+
+
+            const newAccessToken = await generateAccessToken(refreshToken);
+            res.cookie("accessToken", newAccessToken, {
+                httpOnly: true,
+                sameSite: 'lax',
+                secure: false,
+                maxAge: 40 * 1000 // 40 seconds
+            });
+            req.user = decoded;
+            next();
+        } catch (error) {
+            return res.status(StatusCode.UNAUTHORIZED).json({ message: "Invalid refresh token", action: "login" });
+        }
     }
 
     try {
