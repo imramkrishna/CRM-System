@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Refresh Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .log {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Token Refresh Test</h1>
+    <p>This page tests the automatic token refresh mechanism.</p>
+
+    <div>
+        <button onclick="testLogin()">1. Login as Distributor</button>
+        <button onclick="testDashboard()">2. Test Dashboard API</button>
+        <button onclick="testWaitAndCall()">3. Wait 45s and Test Again</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <div id="status" class="status info">Ready to test...</div>
+    <div id="log" class="log">Test log will appear here...\n</div>
+
+    <script>
+        const log = document.getElementById('log');
+        const status = document.getElementById('status');
+
+        function addLog(message, isError = false) {
+            const timestamp = new Date().toLocaleTimeString();
+            log.textContent += `[${timestamp}] ${message}\n`;
+            log.scrollTop = log.scrollHeight;
+
+            if (isError) {
+                status.className = 'status error';
+                status.textContent = 'Error: ' + message;
+            } else {
+                status.className = 'status success';
+                status.textContent = 'Success: ' + message;
+            }
+        }
+
+        function clearLog() {
+            log.textContent = '';
+            status.className = 'status info';
+            status.textContent = 'Log cleared...';
+        }
+
+        async function testLogin() {
+            addLog('Testing login...');
+            try {
+                const response = await fetch('http://localhost:3001/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        password: 'password123'
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    addLog(`Login successful: ${JSON.stringify(data, null, 2)}`);
+                } else {
+                    addLog(`Login failed: ${response.status} ${response.statusText}`, true);
+                }
+            } catch (error) {
+                addLog(`Login error: ${error.message}`, true);
+            }
+        }
+
+        async function testDashboard() {
+            addLog('Testing dashboard API...');
+            try {
+                const response = await fetch('http://localhost:3001/distributor/dashboard', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    addLog(`Dashboard API successful: ${JSON.stringify(data, null, 2)}`);
+                } else {
+                    addLog(`Dashboard API failed: ${response.status} ${response.statusText}`, true);
+                }
+            } catch (error) {
+                addLog(`Dashboard API error: ${error.message}`, true);
+            }
+        }
+
+        async function testWaitAndCall() {
+            addLog('Waiting 45 seconds for token to expire...');
+            status.className = 'status info';
+            status.textContent = 'Waiting for token expiration...';
+
+            let countdown = 45;
+            const timer = setInterval(() => {
+                status.textContent = `Waiting for token expiration... ${countdown}s`;
+                countdown--;
+                if (countdown < 0) {
+                    clearInterval(timer);
+                    testDashboard();
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+
+</html>

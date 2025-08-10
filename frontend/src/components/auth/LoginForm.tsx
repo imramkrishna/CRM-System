@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAppDispatch } from '@/lib/hooks';
 import { loginStart, loginSuccess, loginFailure, type User } from '@/lib/slices/authSlice';
-import axios from 'axios';
+import { post } from '@/lib/api';
 interface LoginFormProps {
     type: 'admin' | 'distributor';
     title: string;
@@ -31,11 +31,9 @@ const LoginForm = ({ type, title, subtitle }: LoginFormProps) => {
         try {
             setIsLoading(true)
             if (type == "admin") {
-                const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/adminLogin`, {
+                const response = await post('/auth/adminLogin', {
                     email,
                     password
-                }, {
-                    withCredentials: true
                 });
                 const apiUser = response.data.user || {};
                 const normalizedUser: User = {
@@ -47,11 +45,9 @@ const LoginForm = ({ type, title, subtitle }: LoginFormProps) => {
                 dispatch(loginSuccess(normalizedUser));
                 router.replace('/admin');
             } else {
-                const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`, {
+                const response = await post('/auth/login', {
                     email,
                     password
-                }, {
-                    withCredentials: true
                 });
                 const apiUser = response.data.user || {};
                 const normalizedUser: User = {

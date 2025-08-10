@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppSelector, useAppDispatch } from '@/lib/hooks';
 import { logout } from '@/lib/slices/authSlice';
-import axios from "axios"
+import { get } from "@/lib/api"
 // Theme imports removed
 import {
     LayoutDashboard,
@@ -60,7 +60,7 @@ import {
 const AdminDashboard = () => {
     const router = useRouter();
     const dispatch = useAppDispatch();
-    const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+    const { user, isAuthenticated, isInitialized } = useAppSelector((state) => state.auth);
     // Theme-related code removed
     const [activeSection, setActiveSection] = useState('dashboard');
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -93,7 +93,7 @@ const AdminDashboard = () => {
         try {
             // Fetch data based on the active section and search queries
             //adding withCredentials true for cross origin request
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/dashboard`, { withCredentials: true });
+            const response = await get('/admin/dashboard');
             console.log(response.data);
             // Handle the fetched data
         } catch (error) {
@@ -105,12 +105,17 @@ const AdminDashboard = () => {
     };
 
     useEffect(() => {
-        if (!isAuthenticated || user?.role !== 'admin') {
+        // Only check authentication after auth state is initialized
+        if (isInitialized && (!isAuthenticated || user?.role !== 'admin')) {
             router.push('/auth/admin-login');
+            return;
         }
-        fetchData();
 
-    }, [isAuthenticated, user, router]);
+        // Only fetch data if authenticated as admin
+        if (isAuthenticated && user?.role === 'admin') {
+            fetchData();
+        }
+    }, [isAuthenticated, isInitialized, user, router]);
 
     const handleLogout = () => {
         dispatch(logout());
@@ -119,6 +124,15 @@ const AdminDashboard = () => {
 
     // Loading state 
     // Theme mounting check removed
+
+    // Show loading until auth is initialized
+    if (!isInitialized) {
+        return (
+            <div className="min-h-screen bg-white flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+        );
+    }
 
     if (!isAuthenticated || user?.role !== 'admin') {
         return (

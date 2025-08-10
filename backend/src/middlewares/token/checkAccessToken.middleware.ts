@@ -6,47 +6,56 @@ import { User } from "../../types";
 import { generateAccessToken } from "../../utils/generateToken";
 import validateRefreshToken from "../../utils/validateRefreshToken";
 declare global {
-    namespace Express {
-        interface Request {
-            user?: User;
-        }
+  namespace Express {
+    interface Request {
+      user?: User;
     }
+  }
 }
 
-const checkAccessTokenMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
-    const accessToken = req.cookies.accessToken;
+const checkAccessTokenMiddleware = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<Response | void> => {
+  const accessToken = req.cookies.accessToken;
 
-    if (!accessToken) {
-        const refreshToken = req.cookies.refreshToken;
-        if (!refreshToken) {
-            return res.status(StatusCode.UNAUTHORIZED).json({ message: "Access token required", action: "login" });
-        }
-        // Handle refresh token logic here
-        try {
-            const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET!) as User;
-
-
-            const newAccessToken = await generateAccessToken(refreshToken);
-            res.cookie("accessToken", newAccessToken, {
-                httpOnly: true,
-                sameSite: 'lax',
-                secure: false,
-                maxAge: 40 * 1000 // 40 seconds
-            });
-            req.user = decoded;
-            next();
-        } catch (error) {
-            return res.status(StatusCode.UNAUTHORIZED).json({ message: "Invalid refresh token", action: "login" });
-        }
+  if (!accessToken) {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res
+        .status(StatusCode.UNAUTHORIZED)
+        .json({ message: "Access token required", action: "login" });
     }
-
+    // Handle refresh token logic here
     try {
-        const decoded = jwt.verify(accessToken, process.env.JWT_SECRET!) as User;
-        req.user = decoded;
-        next();
+      const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET!) as User;
+
+      const newAccessToken = await generateAccessToken(refreshToken);
+      res.cookie("accessToken", newAccessToken, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: false,
+        maxAge: 40 * 1000, // 40 seconds
+      });
+      req.user = decoded;
+      return next();
     } catch (error) {
-        return res.status(StatusCode.UNAUTHORIZED).json({ message: "Invalid access token" });
+      return res
+        .status(StatusCode.UNAUTHORIZED)
+        .json({ message: "Invalid refresh token", action: "login" });
     }
+  }
+
+  try {
+    const decoded = jwt.verify(accessToken, process.env.JWT_SECRET!) as User;
+    req.user = decoded;
+    return next();
+  } catch (error) {
+    return res
+      .status(StatusCode.UNAUTHORIZED)
+      .json({ message: "Invalid access token" });
+  }
 };
 
 export default checkAccessTokenMiddleware;

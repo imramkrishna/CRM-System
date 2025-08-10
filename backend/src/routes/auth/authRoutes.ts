@@ -4,6 +4,8 @@ import registerController from '../../controllers/auth/register.controller';
 import verifyPendingRegistrationController from '../../controllers/auth/verify.controller';
 import adminController from '../../controllers/auth/adminController';
 import adminLoginController from '../../controllers/auth/adminLogin.controller';
+import checkAccessToken from '../../middlewares/token/checkAccessToken.middleware';
+
 const authRouter = express.Router();
 
 authRouter.post('/login', loginController);
@@ -13,6 +15,21 @@ authRouter.post('/register', registerController);
 authRouter.post('/verifyDistributor', verifyPendingRegistrationController);
 
 authRouter.post('/adminLogin', adminLoginController);
+
+// Simple ping endpoint for token refresh
+authRouter.get('/ping', (req, res) => {
+    res.json({ message: 'pong', timestamp: new Date().toISOString() });
+});
+
+// Verify endpoint to check if current token is valid
+authRouter.get('/verify', checkAccessToken, (req, res) => {
+    // If middleware passes, token is valid
+    res.json({
+        valid: true,
+        user: req.user,
+        timestamp: new Date().toISOString()
+    });
+});
 
 // authRouter.post("/create-admin", adminController);
 

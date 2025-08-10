@@ -39,12 +39,12 @@ import {
     ArrowUpRight,
     ArrowDownRight
 } from 'lucide-react';
-import axios from 'axios';
+import { get } from '@/lib/api';
 
 const DistributorDashboard = () => {
     const router = useRouter();
     const dispatch = useAppDispatch();
-    const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+    const { user, isAuthenticated, isInitialized } = useAppSelector((state) => state.auth);
     const [activeSection, setActiveSection] = useState('dashboard');
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -67,9 +67,7 @@ const DistributorDashboard = () => {
     const fetchDashboard = async () => {
         setLoading(true);
         try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/distributor/dashboard`, {
-                withCredentials: true
-            });
+            const response = await get('/distributor/dashboard');
             console.log(response.data);
         } catch (error) {
             console.error("Error fetching dashboard data:", error);
@@ -79,17 +77,31 @@ const DistributorDashboard = () => {
     };
 
     useEffect(() => {
-        if (!isAuthenticated || user?.role != 'distributor') {
+        // Only check authentication after auth state is initialized
+        if (isInitialized && !isAuthenticated) {
             router.push('/auth/distributor-login');
+            return;
         }
-        fetchDashboard();
 
-    }, [isAuthenticated, user, router]);
+        // Only fetch dashboard if authenticated
+        if (isAuthenticated) {
+            fetchDashboard();
+        }
+    }, [isAuthenticated, isInitialized]);
 
     const handleLogout = () => {
         dispatch(logout());
         router.push('/');
     };
+
+    // Show loading until auth is initialized
+    if (!isInitialized) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+        );
+    }
 
     if (!isAuthenticated || user?.role !== 'distributor') {
         return null;
