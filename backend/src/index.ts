@@ -6,14 +6,29 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import adminRouter from "./routes/profile/adminRoutes";
 import distributorRouter from "./routes/profile/distributorRoutes";
+
 // Load environment variables from .env file
 dotenv.config();
 
 // Create an Express application
 const app = express();
+
+// Basic health check endpoint
+app.get('/', (req, res) => {
+  res.json({ 
+    status: 'HarmonySurgiTech API is running', 
+    timestamp: new Date().toISOString() 
+  });
+});
+
+app.get('/health', (req, res) => {
+  res.json({ status: 'healthy' });
+});
+
 // Middleware
 app.use(cookieParser());
 app.use(express.json());
+
 const allowedOrigins = [
     "http://localhost:3000",
     "http://localhost:3002", // for your local dev
@@ -45,12 +60,31 @@ app.use("/profile", profileRouter);
 app.use("/admin", adminRouter);
 app.use("/distributor", distributorRouter);
 
-// Basic route for testing
-app.get("/", (req, res) => {
-    res.send("Backend Server is Running");
+// Error handling middleware
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error('Error:', err);
+    res.status(500).json({ 
+        message: 'Internal server error',
+        error: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
+    });
+});
+
+// 404 handler
+app.use('*', (req, res) => {
+    res.status(404).json({ message: 'Route not found' });
 });
 
 // Start the server
-app.listen(3001, () => {
-    console.log("Server is running on port 3001");
+const PORT = parseInt(process.env.PORT || '3001', 10);
+
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server is running on port ${PORT}`);
+    console.log('Environment:', {
+        NODE_ENV: process.env.NODE_ENV,
+        JWT_SECRET_SET: !!process.env.JWT_SECRET,
+        DATABASE_URL_SET: !!process.env.DATABASE_URL
+    });
+}).on('error', (err) => {
+    console.error('Server failed to start:', err);
+    process.exit(1);
 });
