@@ -32,6 +32,7 @@ const authSlice = createSlice({
             state.error = null;
         },
         loginSuccess: (state, action: PayloadAction<User>) => {
+            console.log('AuthSlice: Login success, storing user:', action.payload);
             state.loading = false;
             state.isAuthenticated = true;
             state.user = action.payload;
@@ -40,8 +41,10 @@ const authSlice = createSlice({
 
             // Persist to localStorage
             if (typeof window !== 'undefined') {
+                console.log('AuthSlice: Storing to localStorage');
                 localStorage.setItem('auth_user', JSON.stringify(action.payload));
                 localStorage.setItem('auth_isAuthenticated', 'true');
+                console.log('AuthSlice: Stored user data:', localStorage.getItem('auth_user'));
             }
         },
         loginFailure: (state, action: PayloadAction<string>) => {
