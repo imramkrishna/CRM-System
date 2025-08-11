@@ -43,13 +43,13 @@ const loginController = async (req: Request, res: Response): Promise<Response> =
         //setting both refresh and access token in cookies
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
-            secure: false, // Use secure cookies in production
+            secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
             sameSite: 'lax', // Adjust as necessary for your application
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
         res.cookie('accessToken', accessToken, {
             httpOnly: true,
-            secure: false, // Use secure cookies in production
+            secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
             sameSite: 'lax', // Adjust as necessary for your application
             maxAge: 40 * 1000 // 40 seconds
             //15 * 60 * 1000 // 15 minutes

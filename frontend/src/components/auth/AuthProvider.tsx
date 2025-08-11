@@ -32,9 +32,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                             dispatch(restoreAuth({ user, isAuthenticated: true }));
                             return;
                         }
-                    } catch (error) {
+                    } catch (error: any) {
                         // If verification fails, clear stored data
-                        console.log('Token verification failed, clearing stored auth');
+                        console.log('Token verification failed:', error.response?.data?.message || error.message);
+                        // Only clear auth if it's actually a 401 (unauthorized) error
+                        // Don't clear for network errors or server errors
+                        if (error.response?.status === 401) {
+                            localStorage.removeItem('auth_user');
+                            localStorage.removeItem('auth_isAuthenticated');
+                        } else {
+                            // For network errors or server issues, keep the user logged in
+                            // but mark as initialized so the app can continue
+                            dispatch(restoreAuth({ user, isAuthenticated: true }));
+                            return;
+                        }
                     }
                 }
 

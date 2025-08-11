@@ -35,7 +35,7 @@ const checkAccessTokenMiddleware = async (
       res.cookie("accessToken", newAccessToken, {
         httpOnly: true,
         sameSite: "lax",
-        secure: false,
+        secure: process.env.NODE_ENV === 'production',
         maxAge: 40 * 1000, // 40 seconds
       });
       req.user = decoded;

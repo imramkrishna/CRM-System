@@ -17,11 +17,21 @@ app.use(express.json());
 const allowedOrigins = [
     "http://localhost:3000",
     "https://harmony-surgi-tech.vercel.app",
+    // Add any other Vercel preview URLs if needed
 ];
 
 app.use(
     cors({
-        origin: allowedOrigins, // allow both localhost and Vercel
+        origin: function (origin, callback) {
+            // Allow requests with no origin (like mobile apps or curl requests)
+            if (!origin) return callback(null, true);
+
+            if (allowedOrigins.indexOf(origin) !== -1) {
+                callback(null, true);
+            } else {
+                callback(new Error('Not allowed by CORS'));
+            }
+        },
         credentials: true,      // required for cookies
         methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
         allowedHeaders: ["Content-Type", "Authorization"],

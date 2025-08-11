@@ -21,6 +21,15 @@ authRouter.get('/ping', (req, res) => {
     res.json({ message: 'pong', timestamp: new Date().toISOString() });
 });
 
+// Debug endpoint to check cookies
+authRouter.get('/debug/cookies', (req, res) => {
+    res.json({
+        cookies: req.cookies,
+        headers: req.headers,
+        timestamp: new Date().toISOString()
+    });
+});
+
 // Verify endpoint to check if current token is valid
 authRouter.get('/verify', checkAccessToken, (req, res) => {
     // If middleware passes, token is valid

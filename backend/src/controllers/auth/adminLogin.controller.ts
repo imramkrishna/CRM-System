@@ -45,13 +45,13 @@ const adminLoginController = async (req: Request, res: Response): Promise<Respon
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-            sameSite: 'strict', // Adjust as necessary for your application
+            sameSite: 'lax', // Adjust as necessary for your application
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
         res.cookie('accessToken', accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-            sameSite: 'strict', // Adjust as necessary for your application
+            sameSite: 'lax', // Adjust as necessary for your application
             maxAge: 40 * 1000 // 40 seconds
             //15 * 60 * 1000 // 15 minutes
         });
