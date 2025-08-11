@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
                     // Verify the stored auth data with the server
                     try {
-                        const response = await get('/auth/verify');
+                        const response = await get(`${process.env.NEXT_PUBLIC_API_URL}/auth/verify`);
 
                         // If verification succeeds, restore the auth state
                         if (response.data.valid) {
