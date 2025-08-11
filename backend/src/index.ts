@@ -15,14 +15,14 @@ const app = express();
 
 // Basic health check endpoint
 app.get('/', (req, res) => {
-  res.json({ 
-    status: 'HarmonySurgiTech API is running', 
-    timestamp: new Date().toISOString() 
-  });
+    res.json({
+        status: 'HarmonySurgiTech API is running',
+        timestamp: new Date().toISOString()
+    });
 });
 
 app.get('/health', (req, res) => {
-  res.json({ status: 'healthy' });
+    res.json({ status: 'healthy' });
 });
 
 // Middleware
@@ -63,14 +63,14 @@ app.use("/distributor", distributorRouter);
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
     console.error('Error:', err);
-    res.status(500).json({ 
+    res.status(500).json({
         message: 'Internal server error',
         error: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
     });
 });
 
 // 404 handler
-app.use('*', (req, res) => {
+app.use((req, res) => {
     res.status(404).json({ message: 'Route not found' });
 });
 
