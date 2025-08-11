@@ -33,7 +33,11 @@ const checkAccessTokenMiddleware = async (
 
       const newAccessToken = await generateAccessToken(refreshToken);
       res.cookie("accessToken", newAccessToken, {
+        httpOnly: true,
+        secure: true, // Required for cross-origin HTTPS
+        sameSite: "none", // Required for cross-origin cookies
         maxAge: 40 * 1000, // 40 seconds
+        domain: undefined // Let browser handle domain
       });
       req.user = decoded;
       return next();

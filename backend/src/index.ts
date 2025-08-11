@@ -14,9 +14,25 @@ const app = express();
 // Middleware
 app.use(cookieParser());
 app.use(express.json());
+const allowedOrigins = [
+    "http://localhost:3000",
+    "http://localhost:3002", // for your local dev
+    "https://harmony-surgi-tech.vercel.app"
+];
+
 app.use(
     cors({
-        origin: process.env.CLIENT_URL || "http://localhost:3000",
+        origin: function (origin, callback) {
+            // Allow requests with no origin (like mobile apps or curl requests)
+            if (!origin) return callback(null, true);
+
+            if (allowedOrigins.includes(origin)) {
+                callback(null, true);
+            } else {
+                console.log('CORS blocked origin:', origin);
+                callback(null, true); // Allow all for now, change to callback(new Error('Not allowed by CORS')) later
+            }
+        },
         credentials: true,
         methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
         allowedHeaders: ["Content-Type", "Authorization"],

@@ -41,12 +41,20 @@ const adminLoginController = async (req: Request, res: Response): Promise<Respon
                 adminId: adminUser.id,
             }
         });
-        //setting both refresh and access token in cookies - simplified
+        //setting both refresh and access token in cookies - cross-origin compatible
         res.cookie('refreshToken', refreshToken, {
-            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+            httpOnly: true,
+            secure: true, // Required for cross-origin HTTPS
+            sameSite: 'none', // Required for cross-origin cookies
+            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+            domain: undefined // Let browser handle domain
         });
         res.cookie('accessToken', accessToken, {
-            maxAge: 40 * 1000 // 40 seconds
+            httpOnly: true,
+            secure: true, // Required for cross-origin HTTPS
+            sameSite: 'none', // Required for cross-origin cookies
+            maxAge: 40 * 1000, // 40 seconds
+            domain: undefined // Let browser handle domain
         });
         return res.status(StatusCode.SUCCESS).json({
             message: 'Login successful',
