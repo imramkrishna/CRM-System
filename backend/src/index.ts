@@ -17,7 +17,8 @@ app.use(express.json());
 const allowedOrigins = [
     "http://localhost:3000",
     "https://harmony-surgi-tech.vercel.app",
-    // Add any other Vercel preview URLs if needed
+    "https://harmonysurgitech.onrender.com",
+    // Add any other preview URLs if needed
 ];
 
 app.use(
@@ -29,6 +30,7 @@ app.use(
             if (allowedOrigins.indexOf(origin) !== -1) {
                 callback(null, true);
             } else {
+                console.log('CORS blocked origin:', origin);
                 callback(new Error('Not allowed by CORS'));
             }
         },
@@ -38,8 +40,6 @@ app.use(
         optionsSuccessStatus: 200,
     })
 );
-
-
 // Routes
 app.use("/auth", authRouter)
 app.use("/profile", profileRouter);
