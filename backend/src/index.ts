@@ -14,10 +14,20 @@ const app = express();
 // Middleware
 app.use(cookieParser());
 app.use(express.json());
-app.use(cors({
-    origin: "http://localhost:3000",
-    credentials: true
-}));
+const allowedOrigins = [
+    "http://localhost:3000",
+    "https://harmony-surgi-tech.vercel.app",
+];
+
+app.use(
+    cors({
+        origin: allowedOrigins, // allow both localhost and Vercel
+        credentials: true,      // required for cookies
+        methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
+        allowedHeaders: ["Content-Type", "Authorization"],
+        optionsSuccessStatus: 200,
+    })
+);
 
 
 // Routes
