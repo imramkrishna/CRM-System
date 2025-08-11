@@ -19,9 +19,9 @@ const checkAccessTokenMiddleware = async (
   next: NextFunction
 ): Promise<Response | void> => {
   const accessToken = req.cookies.accessToken;
-
   if (!accessToken) {
     const refreshToken = req.cookies.refreshToken;
+    console.log("RefreshToken:", refreshToken);
     if (!refreshToken) {
       return res
         .status(StatusCode.UNAUTHORIZED)

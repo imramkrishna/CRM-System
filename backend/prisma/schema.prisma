@@ -55,6 +55,7 @@ model pendingRegistration {
   phone       String   @unique
   address     String
   password    String
+  message     String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

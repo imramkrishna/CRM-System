@@ -5,6 +5,7 @@ import verifyPendingRegistrationController from '../../controllers/auth/verify.c
 import adminController from '../../controllers/auth/adminController';
 import adminLoginController from '../../controllers/auth/adminLogin.controller';
 import checkAccessToken from '../../middlewares/token/checkAccessToken.middleware';
+import pendingDistributorsController from '../../controllers/auth/pendingDistributors.middlware';
 
 const authRouter = express.Router();
 
@@ -13,6 +14,8 @@ authRouter.post('/login', loginController);
 authRouter.post('/register', registerController);
 
 authRouter.post('/verifyDistributor', verifyPendingRegistrationController);
+
+authRouter.get('/pendingDistributors', checkAccessToken, pendingDistributorsController);
 
 authRouter.post('/adminLogin', adminLoginController);
 

@@ -2,14 +2,13 @@ import { Request, Response } from 'express';
 import prisma from '../../utils/prismaClient';
 import { StatusCode } from '../../types';
 import bcrypt from "bcrypt";
-import { pendingRegistration, distributor } from '@prisma/client';
 
 const registerController = async (req: Request, res: Response) => {
-    const { ownerName, email, phone, companyName, password, address } = req.body;
+    const { ownerName, email, phone, companyName, message, address, password } = req.body;
 
     try {
         // Validate input
-        if (!ownerName || !email || !phone || !companyName || !password || !address) {
+        if (!ownerName || !email || !phone || !companyName || !message || !address || !password) {
             return res.status(StatusCode.BAD_REQUEST).json({ message: 'All fields are required' });
         }
 
@@ -39,6 +38,7 @@ const registerController = async (req: Request, res: Response) => {
                 phone,
                 companyName,
                 address,
+                message,
                 password: hashedPassword
             }
         });

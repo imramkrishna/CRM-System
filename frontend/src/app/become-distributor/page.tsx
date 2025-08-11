@@ -2,16 +2,18 @@
 
 import { useState } from 'react';
 import Layout from '@/components/layout/Layout';
-import { User, Mail, Phone, Building, MapPin, FileText, Send } from 'lucide-react';
-
+import { User, Mail, Phone, Building, MapPin, FileText, Send, LockIcon } from 'lucide-react';
+import axios from 'axios';
+import { post } from '@/lib/api';
 export default function BecomeDistributorPage() {
+
     const [formData, setFormData] = useState({
-        name: '',
+        ownerName: '',
         email: '',
         phone: '',
         companyName: '',
+        password: '',
         address: '',
-        experience: '',
         message: ''
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -27,9 +29,17 @@ export default function BecomeDistributorPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
-
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        try {
+            const response = await post(`/auth/register`, formData, {
+                withCredentials: true,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+        } catch (e) {
+            alert("Error Submitting Form");
+            setIsSubmitted(false)
+        }
 
         setIsSubmitting(false);
         setIsSubmitted(true);
@@ -167,10 +177,10 @@ export default function BecomeDistributorPage() {
                                             </div>
                                             <input
                                                 type="text"
-                                                id="name"
-                                                name="name"
+                                                id="ownerName"
+                                                name="ownerName"
                                                 required
-                                                value={formData.name}
+                                                value={formData.ownerName}
                                                 onChange={handleChange}
                                                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                                                 placeholder="Your full name"
@@ -261,22 +271,26 @@ export default function BecomeDistributorPage() {
                                             />
                                         </div>
                                     </div>
-
+                                    {/** Password Field */}
                                     <div>
-                                        <label htmlFor="experience" className="block text-sm font-medium text-gray-700 mb-1">
-                                            Years of Experience *
+                                        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                                            Password *
                                         </label>
-                                        <input
-                                            type="number"
-                                            id="experience"
-                                            name="experience"
-                                            required
-                                            min="0"
-                                            value={formData.experience}
-                                            onChange={handleChange}
-                                            className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                                            placeholder="Years in medical device distribution"
-                                        />
+                                        <div className="relative">
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <LockIcon className="h-5 w-5 text-gray-400" />
+                                            </div>
+                                            <input
+                                                type="password"
+                                                id="password"
+                                                name="password"
+                                                required
+                                                value={formData.password}
+                                                onChange={handleChange}
+                                                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                                placeholder="Your password"
+                                            />
+                                        </div>
                                     </div>
 
                                     <div>

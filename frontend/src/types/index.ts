@@ -21,12 +21,14 @@ export interface User {
 
 export interface DistributorApplication {
     id: string;
-    name: string;
+    ownerName: string;
     email: string;
     phone: string;
     companyName: string;
     address: string;
-    experience: string;
-    status: 'pending' | 'approved' | 'rejected';
-    submittedAt: string;
+    message: string;
+    password: string;
+    status?: 'pending' | 'approved' | 'rejected';
+    createdAt?: string;
+    updatedAt?: string;
 }
