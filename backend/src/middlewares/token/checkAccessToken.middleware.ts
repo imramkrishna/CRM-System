@@ -33,9 +33,6 @@ const checkAccessTokenMiddleware = async (
 
       const newAccessToken = await generateAccessToken(refreshToken);
       res.cookie("accessToken", newAccessToken, {
-        httpOnly: true,
-        sameSite: "lax",
-        secure: false,
         maxAge: 40 * 1000, // 40 seconds
       });
       req.user = decoded;

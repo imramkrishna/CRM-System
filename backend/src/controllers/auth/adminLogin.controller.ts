@@ -41,19 +41,12 @@ const adminLoginController = async (req: Request, res: Response): Promise<Respon
                 adminId: adminUser.id,
             }
         });
-        //setting both refresh and access token in cookies
+        //setting both refresh and access token in cookies - simplified
         res.cookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            secure: false, // Keep same as localhost for debugging
-            sameSite: 'lax', // Use lax instead of none
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
         res.cookie('accessToken', accessToken, {
-            httpOnly: true,
-            secure: false, // Keep same as localhost for debugging
-            sameSite: 'lax', // Use lax instead of none
             maxAge: 40 * 1000 // 40 seconds
-            //15 * 60 * 1000 // 15 minutes
         });
         return res.status(StatusCode.SUCCESS).json({
             message: 'Login successful',

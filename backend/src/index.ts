@@ -14,17 +14,10 @@ const app = express();
 // Middleware
 app.use(cookieParser());
 app.use(express.json());
-const allowedOrigins = [
-    "http://localhost:3000",
-    "https://harmony-surgi-tech.vercel.app",
-    "https://harmonysurgitech.onrender.com",
-    // Add any other preview URLs if needed
-];
-
 app.use(
     cors({
-        origin: true, // Allow all origins for debugging
-        credentials: true,      // required for cookies
+        origin: "*", // Allow all origins - no restrictions
+        credentials: true,
         methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
         allowedHeaders: ["Content-Type", "Authorization"],
         optionsSuccessStatus: 200,
