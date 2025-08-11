@@ -1,6 +1,7 @@
-/** @type {import('tailwindcss').Config} */
-export default {
-    content: ['./src/**/*.{js,ts,jsx,tsx}'],
+import type { Config } from 'tailwindcss';
+
+const config: Config = {
+    content: ['./src/**/*.{ts,tsx}', './public/index.html'],
     theme: {
         extend: {
             colors: {
@@ -25,13 +26,7 @@ export default {
             }
         },
     },
-    variants: {
-        extend: {
-            backgroundColor: ['hover'],
-            textColor: ['hover'],
-            borderColor: [],
-            opacity: [],
-        },
-    },
     plugins: [],
-}
+};
+
+export default config;
