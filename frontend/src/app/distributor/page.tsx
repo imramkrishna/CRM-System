@@ -40,6 +40,9 @@ import {
     ArrowDownRight
 } from 'lucide-react';
 import { get } from '@/lib/api';
+import Orders from '@/components/distributor/Orders';
+import Products from '@/components/distributor/Products';
+import Transactions from '@/components/distributor/Transactions';
 
 const DistributorDashboard = () => {
     const router = useRouter();
@@ -1056,11 +1059,11 @@ const DistributorDashboard = () => {
             case 'dashboard':
                 return renderDashboard();
             case 'orders':
-                return renderOrders();
+                return <Orders />;
             case 'products':
-                return renderProducts();
+                return <Products />;
             case 'transaction-history':
-                return renderTransactionHistory();
+                return <Transactions />;
             default:
                 return renderDashboard();
         }
