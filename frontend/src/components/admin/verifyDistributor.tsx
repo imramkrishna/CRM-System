@@ -1,53 +1,15 @@
 import { DistributorApplication } from '@/types';
 import {
-    LayoutDashboard,
-    TrendingUp,
-    Users,
-    FileText,
-    Package,
-    ShoppingCart,
-    Receipt,
-    RotateCcw,
-    History,
-    CreditCard,
+
     Search,
-    Bell,
-    Settings,
-    Moon,
-    Sun,
-    LogOut,
-    Menu,
-    X,
-    ChevronDown,
-    BarChart3,
-    DollarSign,
-    ShoppingBag,
-    AlertTriangle,
-    Plus,
-    Filter,
-    Download,
-    Eye,
-    Edit,
-    Trash2,
-    Check,
-    Clock,
-    ArrowUpRight,
-    ArrowDownRight,
-    UserPlus,
     UserCheck,
-    UserX,
-    Calendar,
-    Star,
     Building,
     Phone,
     Mail,
     MapPin,
-    Truck,
     RefreshCw,
     XCircle,
-    Printer,
-    CheckCircle,
-    FileBarChart
+    CheckCircle
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { post, get } from '@/lib/api';
@@ -79,7 +41,7 @@ const VerifyDistributor = () => {
 
     const handleApprove = async (distributor: DistributorApplication) => {
         try {
-            const response = await post(`/auth/approveDistributor`, { email: distributor.email });
+            const response = await post(`/auth/verifyDistributor`, { email: distributor.email });
             // Remove from pending list after approval
             setDistributors(prev => prev.filter(d => d.id !== distributor.id));
             if (distributors.length > 1) {
@@ -95,10 +57,7 @@ const VerifyDistributor = () => {
 
     const handleReject = async (distributor: DistributorApplication) => {
         try {
-            // Add your reject API call here
-            console.log('Rejecting distributor:', distributor);
-            // Remove from pending list after rejection
-            setDistributors(prev => prev.filter(d => d.id !== distributor.id));
+            const response = await post(`/auth/rejectDistributor`, { email: distributor.email });
             if (distributors.length > 1) {
                 const nextDistributor = distributors.find(d => d.id !== distributor.id);
                 setSelectedDistributor(nextDistributor || null);

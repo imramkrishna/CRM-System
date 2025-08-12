@@ -1,27 +1,7 @@
 import {
-    LayoutDashboard,
-    TrendingUp,
-    Users,
-    FileText,
-    Package,
     ShoppingCart,
-    Receipt,
-    RotateCcw,
-    History,
-    CreditCard,
     Search,
-    Bell,
-    Settings,
-    Moon,
-    Sun,
-    LogOut,
-    Menu,
-    X,
-    ChevronDown,
-    BarChart3,
     DollarSign,
-    ShoppingBag,
-    AlertTriangle,
     Plus,
     Filter,
     Download,
@@ -30,30 +10,52 @@ import {
     Trash2,
     Check,
     Clock,
-    ArrowUpRight,
-    ArrowDownRight,
-    UserPlus,
-    UserCheck,
-    UserX,
-    Calendar,
-    Star,
-    Building,
-    Phone,
-    Mail,
-    MapPin,
-    Truck,
-    RefreshCw,
-    XCircle,
-    Printer,
-    CheckCircle,
-    FileBarChart
+    ArrowUpRight
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { get } from '@/lib/api';
+
+interface OrderItem {
+    id: string;
+    orderId: string;
+    productId: number;
+    quantity: number;
+    unitPrice: string;
+    listPrice: string;
+    discountPercent: string;
+    discountAmount: string;
+    lineTotal: string;
+    productSku: string;
+    productName: string;
+    productDescription: string;
+    productBrand: string;
+    productCategory: string;
+    notes: string | null;
+    requestedDeliveryDate: string | null;
+    quantityFulfilled: number;
+    fulfilledAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+}
+
+interface GroupedOrder {
+    orderId: string;
+    items: OrderItem[];
+    totalAmount: number;
+    itemCount: number;
+    productSummary: string;
+    status: string;
+    createdAt: string;
+    isFulfilled: boolean;
+}
 
 const Orders = () => {
     const [searchQueries, setSearchQueries] = useState({
         orders: ''
     });
+    const [orderDetails, setOrderDetails] = useState<OrderItem[]>([]);
+    const [groupedOrders, setGroupedOrders] = useState<GroupedOrder[]>([]);
+    const [loading, setLoading] = useState(true);
 
     const handleSearchChange = (section: string, value: string) => {
         setSearchQueries(prev => ({
@@ -62,6 +64,83 @@ const Orders = () => {
         }));
     };
 
+    const groupOrdersByOrderId = (orderItems: OrderItem[]): GroupedOrder[] => {
+        const grouped = orderItems.reduce((acc, item) => {
+            if (!acc[item.orderId]) {
+                acc[item.orderId] = [];
+            }
+            acc[item.orderId].push(item);
+            return acc;
+        }, {} as Record<string, OrderItem[]>);
+
+        return Object.entries(grouped).map(([orderId, items]) => {
+            const totalAmount = items.reduce((sum, item) => sum + parseFloat(item.lineTotal), 0);
+            const productSummary = items.slice(0, 2).map(item => item.productName).join(', ') +
+                (items.length > 2 ? ` +${items.length - 2} more` : '');
+            const isFulfilled = items.every(item => item.quantityFulfilled === item.quantity);
+            const status = isFulfilled ? 'DELIVERED' : 'PENDING';
+
+            return {
+                orderId,
+                items,
+                totalAmount,
+                itemCount: items.length,
+                productSummary,
+                status,
+                createdAt: items[0].createdAt,
+                isFulfilled
+            };
+        }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    };
+
+    const getOrderNumber = (orderId: string) => {
+        // Extract a readable order number from the ID
+        const orderIndex = groupedOrders.findIndex(order => order.orderId === orderId) + 1;
+        return `HST-2024-${orderIndex.toString().padStart(3, '0')}`;
+    };
+
+    const fetchOrders = async () => {
+        try {
+            setLoading(true);
+            const response = await get("/admin/getOrders", {
+                withCredentials: true
+            });
+
+            if (response.data && response.data.orderDetails) {
+                setOrderDetails(response.data.orderDetails);
+                const grouped = groupOrdersByOrderId(response.data.orderDetails);
+                setGroupedOrders(grouped);
+            }
+        } catch (error) {
+            console.error('Error fetching orders:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchOrders();
+    }, []);
+
+    // Calculate statistics
+    const totalOrders = groupedOrders.length;
+    const deliveredOrders = groupedOrders.filter(order => order.status === 'DELIVERED').length;
+    const pendingOrders = groupedOrders.filter(order => order.status === 'PENDING').length;
+    const totalValue = groupedOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+
+    // Filter orders based on search
+    const filteredOrders = groupedOrders.filter(order =>
+        order.productSummary.toLowerCase().includes(searchQueries.orders.toLowerCase()) ||
+        getOrderNumber(order.orderId).toLowerCase().includes(searchQueries.orders.toLowerCase())
+    );
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="text-lg text-gray-600">Loading orders...</div>
+            </div>
+        );
+    }
     return (
         <div className="space-y-6">
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
@@ -82,7 +161,7 @@ const Orders = () => {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-blue-100 text-sm font-medium">Total Orders</p>
-                                <p className="text-3xl font-bold">1,247</p>
+                                <p className="text-3xl font-bold">{totalOrders}</p>
                                 <div className="flex items-center mt-2">
                                     <ArrowUpRight className="h-4 w-4 text-blue-200" />
                                     <span className="text-blue-200 text-sm ml-1">+12.5%</span>
@@ -96,7 +175,7 @@ const Orders = () => {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-green-100 text-sm font-medium">Completed</p>
-                                <p className="text-3xl font-bold">896</p>
+                                <p className="text-3xl font-bold">{deliveredOrders}</p>
                                 <div className="flex items-center mt-2">
                                     <ArrowUpRight className="h-4 w-4 text-green-200" />
                                     <span className="text-green-200 text-sm ml-1">+8.3%</span>
@@ -110,7 +189,7 @@ const Orders = () => {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-yellow-100 text-sm font-medium">Pending</p>
-                                <p className="text-3xl font-bold">351</p>
+                                <p className="text-3xl font-bold">{pendingOrders}</p>
                                 <div className="flex items-center mt-2">
                                     <Clock className="h-4 w-4 text-yellow-200" />
                                     <span className="text-yellow-200 text-sm ml-1">-2.1%</span>
@@ -124,7 +203,7 @@ const Orders = () => {
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-purple-100 text-sm font-medium">Total Value</p>
-                                <p className="text-3xl font-bold">$2.8M</p>
+                                <p className="text-3xl font-bold">${totalValue.toLocaleString()}</p>
                                 <div className="flex items-center mt-2">
                                     <ArrowUpRight className="h-4 w-4 text-purple-200" />
                                     <span className="text-purple-200 text-sm ml-1">+15.2%</span>
@@ -182,39 +261,33 @@ const Orders = () => {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {[
-                                { id: 'ORD-001', distributor: 'MedSupply Co.', products: 'Surgical Masks, Gloves', amount: '$2,450', status: 'Delivered', date: '2024-01-15', items: 15 },
-                                { id: 'ORD-002', distributor: 'Healthcare Plus', products: 'Syringes, Bandages', amount: '$1,890', status: 'Processing', date: '2024-01-14', items: 8 },
-                                { id: 'ORD-003', distributor: 'SurgiTech Ltd.', products: 'Stethoscopes, Thermometers', amount: '$3,200', status: 'Shipped', date: '2024-01-13', items: 12 },
-                                { id: 'ORD-004', distributor: 'MediCore Inc.', products: 'IV Sets, Catheters', amount: '$1,650', status: 'Pending', date: '2024-01-12', items: 6 },
-                                { id: 'ORD-005', distributor: 'HealthFirst', products: 'Surgical Instruments', amount: '$4,800', status: 'Delivered', date: '2024-01-11', items: 20 }
-                            ].map((order) => (
-                                <tr key={order.id} className="hover:bg-gray-50 transition-colors">
+                            {filteredOrders.map((order) => (
+                                <tr key={order.orderId} className="hover:bg-gray-50 transition-colors">
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-medium text-blue-600">{order.id}</div>
+                                        <div className="text-sm font-medium text-blue-600">{getOrderNumber(order.orderId)}</div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-medium text-gray-900">{order.distributor}</div>
+                                        <div className="text-sm font-medium text-gray-900">Unknown Distributor</div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="text-sm text-gray-900">{order.products}</div>
-                                        <div className="text-xs text-gray-500">{order.items} items</div>
+                                        <div className="text-sm text-gray-900">{order.productSummary}</div>
+                                        <div className="text-xs text-gray-500">{order.itemCount} items</div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-semibold text-gray-900">{order.amount}</div>
+                                        <div className="text-sm font-semibold text-gray-900">${order.totalAmount.toFixed(2)}</div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${order.status === 'Delivered' ? 'bg-green-100 text-green-800' :
-                                            order.status === 'Processing' ? 'bg-blue-100 text-blue-800' :
-                                                order.status === 'Shipped' ? 'bg-indigo-100 text-indigo-800' :
-                                                    order.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${order.status === 'DELIVERED' ? 'bg-green-100 text-green-800' :
+                                            order.status === 'PROCESSING' ? 'bg-blue-100 text-blue-800' :
+                                                order.status === 'SHIPPED' ? 'bg-indigo-100 text-indigo-800' :
+                                                    order.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
                                                         'bg-gray-100 text-gray-800'
                                             }`}>
-                                            {order.status}
+                                            {order.status === 'DELIVERED' ? 'Delivered' : 'Pending'}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {order.date}
+                                        {new Date(order.createdAt).toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                                         <button className="text-blue-600 hover:text-blue-900 p-1 rounded-md hover:bg-blue-50">
@@ -236,7 +309,7 @@ const Orders = () => {
                 {/* Pagination */}
                 <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
                     <div className="text-sm text-gray-600">
-                        Showing 1 to 5 of 1,247 orders
+                        Showing 1 to {filteredOrders.length} of {totalOrders} orders
                     </div>
                     <div className="flex space-x-2">
                         <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors">

@@ -27,6 +27,7 @@ model distributor {
   createdAt                DateTime                   @default(now())
   updatedAt                DateTime                   @updatedAt
   distributorLoginSessions distributorLoginSessions[]
+  orders                   Order[]
 }
 
 model distributorLoginSessions {
@@ -58,4 +59,163 @@ model pendingRegistration {
   message     String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+// Enhanced Order Management
+model Order {
+  id            String      @id @default(cuid())
+  orderNumber   String      @unique // Human-readable order number
+  distributorId Int
+  status        OrderStatus @default(DRAFT)
+
+  // Financial calculations with Decimal for precision
+  subTotal       Decimal @db.Decimal(10, 2)
+  taxAmount      Decimal @default(0) @db.Decimal(10, 2)
+  discountAmount Decimal @default(0) @db.Decimal(10, 2)
+  totalAmount    Decimal @db.Decimal(10, 2)
+
+  // Order metadata
+  notes                 String?
+  internalNotes         String? // Admin-only notes
+  requestedDeliveryDate DateTime?
+
+  // Approval workflow
+  approvedAt      DateTime?
+  rejectedAt      DateTime?
+  rejectionReason String?
+
+  // Audit trail
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  distributor  distributor    @relation(fields: [distributorId], references: [id])
+  orderItems   OrderItem[]
+  orderHistory OrderHistory[]
+
+  @@index([distributorId, status])
+  @@index([orderNumber])
+  @@index([createdAt])
+  @@index([status])
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String @id @default(cuid())
+  orderId   String
+  productId Int
+  quantity  Int
+
+  // Pricing with enterprise precision
+  unitPrice       Decimal @db.Decimal(10, 2) // Price at order time
+  listPrice       Decimal @db.Decimal(10, 2) // Original product price
+  discountPercent Decimal @default(0) @db.Decimal(5, 2)
+  discountAmount  Decimal @default(0) @db.Decimal(10, 2)
+  lineTotal       Decimal @db.Decimal(10, 2) // Final line amount
+
+  // Product snapshot for historical accuracy
+  productSku         String
+  productName        String
+  productDescription String?
+  productBrand       String?
+  productCategory    String?
+
+  // Item-specific data
+  notes                 String?
+  requestedDeliveryDate DateTime?
+
+  // Fulfillment tracking
+  quantityFulfilled Int       @default(0)
+  fulfilledAt       DateTime?
+
+  // Audit
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product product @relation(fields: [productId], references: [id])
+
+  @@unique([orderId, productId])
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+// Complete audit trail for order changes
+model OrderHistory {
+  id           String       @id @default(cuid())
+  orderId      String
+  fromStatus   OrderStatus?
+  toStatus     OrderStatus
+  changeReason String?
+  notes        String?
+  metadata     Json? // Additional data as JSON
+  createdAt    DateTime     @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([createdAt])
+  @@map("order_history")
+}
+
+// Enhanced Product Model with enterprise features
+model product {
+  id          Int     @id @default(autoincrement())
+  sku         String  @unique
+  barcode     String  @unique // Unique barcode for each product
+  name        String
+  description String?
+  category    String?
+  brand       String?
+  color       String?
+
+  // Enterprise pricing with Decimal precision
+  listPrice Decimal  @db.Decimal(10, 2)
+  costPrice Decimal? @db.Decimal(10, 2)
+
+  // Enhanced inventory management
+  stockQuantity    Int  @default(0)
+  reservedQuantity Int  @default(0) // Reserved for pending orders
+  minOrderQuantity Int  @default(1)
+  maxOrderQuantity Int?
+
+  // Product specifications
+  weight     Decimal? @db.Decimal(8, 3)
+  dimensions Json? // {length, width, height, unit}
+
+  // Product lifecycle
+  isActive          Boolean   @default(true)
+  isDiscontinued    Boolean   @default(false)
+  dateOfManufacture DateTime?
+  dateOfExpiry      DateTime?
+
+  // Audit
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  orderItems OrderItem[]
+
+  @@index([sku])
+  @@index([category])
+  @@index([isActive])
+  @@index([brand])
+  @@map("products")
+}
+
+// Enhanced enum with more granular statuses
+enum OrderStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+  PROCESSING
+  READY_TO_SHIP
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURNED
+  PARTIALLY_FULFILLED
 }

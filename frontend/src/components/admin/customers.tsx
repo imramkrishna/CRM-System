@@ -1,64 +1,111 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
-    LayoutDashboard,
-    TrendingUp,
     Users,
-    FileText,
-    Package,
-    ShoppingCart,
-    Receipt,
-    RotateCcw,
-    History,
-    CreditCard,
     Search,
-    Bell,
-    Settings,
-    Moon,
-    Sun,
-    LogOut,
-    Menu,
-    X,
-    ChevronDown,
-    BarChart3,
-    DollarSign,
-    ShoppingBag,
-    AlertTriangle,
     Plus,
-    Filter,
-    Download,
     Eye,
     Edit,
     Trash2,
-    Check,
     Clock,
-    ArrowUpRight,
-    ArrowDownRight,
     UserPlus,
     UserCheck,
-    UserX,
-    Calendar,
-    Star,
-    Building,
-    Phone,
-    Mail,
     MapPin,
-    Truck,
-    RefreshCw,
-    XCircle,
-    Printer,
-    CheckCircle,
-    FileBarChart
+    Phone,
+    Mail
 } from 'lucide-react';
+import { get } from "@/lib/api";
+
+interface Distributor {
+    id: number;
+    ownerName: string;
+    companyName: string;
+    email: string;
+    phone: string;
+    address: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+interface DistributorsResponse {
+    distributors: Distributor[];
+}
+
 const Customers = () => {
+    const [distributors, setDistributors] = useState<Distributor[]>([]);
+    const [filteredDistributors, setFilteredDistributors] = useState<Distributor[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
     // Search states for different sections
     const [searchQueries, setSearchQueries] = useState({
         customers: '',
     });
+
     const handleSearchChange = (section: string, value: string) => {
         setSearchQueries(prev => ({
             ...prev,
             [section]: value
         }));
+    };
+
+    const fetchDistributors = async () => {
+        try {
+            setLoading(true);
+            const response = await get('/admin/distributors', {
+                withCredentials: true
+            });
+
+            if (response.data && response.data.distributors) {
+                setDistributors(response.data.distributors);
+                setFilteredDistributors(response.data.distributors);
+            }
+        } catch (err) {
+            console.error('Error fetching distributors:', err);
+            setError('Failed to fetch distributors');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Filter distributors based on search query
+    useEffect(() => {
+        if (!searchQueries.customers) {
+            setFilteredDistributors(distributors);
+        } else {
+            const filtered = distributors.filter(distributor =>
+                distributor.companyName.toLowerCase().includes(searchQueries.customers.toLowerCase()) ||
+                distributor.ownerName.toLowerCase().includes(searchQueries.customers.toLowerCase()) ||
+                distributor.email.toLowerCase().includes(searchQueries.customers.toLowerCase())
+            );
+            setFilteredDistributors(filtered);
+        }
+    }, [searchQueries.customers, distributors]);
+
+    useEffect(() => {
+        fetchDistributors();
+    }, []);
+
+    // Calculate metrics
+    const totalDistributors = distributors.length;
+    const activeDistributors = distributors.length; // All fetched distributors are active
+    const newThisMonth = distributors.filter(dist => {
+        const createdDate = new Date(dist.createdAt);
+        const currentDate = new Date();
+        return createdDate.getMonth() === currentDate.getMonth() &&
+            createdDate.getFullYear() === currentDate.getFullYear();
+    }).length;
+
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    };
+
+    const formatAddress = (address: string) => {
+        // Truncate long addresses
+        return address.length > 50 ? address.substring(0, 50) + '...' : address;
     };
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -88,7 +135,7 @@ const Customers = () => {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm text-blue-600 font-medium">Total Distributors</p>
-                            <p className="text-2xl font-bold text-gray-900">254</p>
+                            <p className="text-2xl font-bold text-gray-900">{totalDistributors}</p>
                         </div>
                         <Users className="h-8 w-8 text-blue-500" />
                     </div>
@@ -97,7 +144,7 @@ const Customers = () => {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm text-green-600 font-medium">Active</p>
-                            <p className="text-2xl font-bold text-gray-900">186</p>
+                            <p className="text-2xl font-bold text-gray-900">{activeDistributors}</p>
                         </div>
                         <UserCheck className="h-8 w-8 text-green-500" />
                     </div>
@@ -106,162 +153,181 @@ const Customers = () => {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm text-yellow-600 font-medium">New This Month</p>
-                            <p className="text-2xl font-bold text-gray-900">15</p>
+                            <p className="text-2xl font-bold text-gray-900">{newThisMonth}</p>
                         </div>
                         <UserPlus className="h-8 w-8 text-yellow-500" />
                     </div>
                 </div>
-                <div className="p-4 bg-red-50 rounded-lg border border-red-100">
+                <div className="p-4 bg-purple-50 rounded-lg border border-purple-100">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-sm text-red-600 font-medium">Pending Approval</p>
-                            <p className="text-2xl font-bold text-gray-900">8</p>
+                            <p className="text-sm text-purple-600 font-medium">Search Results</p>
+                            <p className="text-2xl font-bold text-gray-900">{filteredDistributors.length}</p>
                         </div>
-                        <Clock className="h-8 w-8 text-red-500" />
+                        <Search className="h-8 w-8 text-purple-500" />
                     </div>
                 </div>
             </div>
 
-            {/* Customer/Distributor List */}
-            <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                        <tr>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Distributor
-                            </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Contact
-                            </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Region
-                            </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Orders
-                            </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Revenue
-                            </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Status
-                            </th>
-                            <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Actions
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                        {[
-                            {
-                                name: 'MedTech Supplies',
-                                contact: 'John Smith',
-                                email: 'john@medtech.com',
-                                region: 'Northeast',
-                                orders: 254,
-                                revenue: '$1.2M',
-                                status: 'Active'
-                            },
-                            {
-                                name: 'Surgical Distributors Inc',
-                                contact: 'Sarah Johnson',
-                                email: 'sarah@surgi-dist.com',
-                                region: 'Midwest',
-                                orders: 187,
-                                revenue: '$876K',
-                                status: 'Active'
-                            },
-                            {
-                                name: 'HealthCare Instruments',
-                                contact: 'Mike Thompson',
-                                email: 'mike@hcinstruments.com',
-                                region: 'West Coast',
-                                orders: 96,
-                                revenue: '$452K',
-                                status: 'Active'
-                            },
-                            {
-                                name: 'Medical Solutions Ltd',
-                                contact: 'Rachel Adams',
-                                email: 'rachel@medsol.com',
-                                region: 'Southwest',
-                                orders: 32,
-                                revenue: '$128K',
-                                status: 'Inactive'
-                            },
-                            {
-                                name: 'ProMed Equipment',
-                                contact: 'David Wilson',
-                                email: 'david@promedequip.com',
-                                region: 'Southeast',
-                                orders: 0,
-                                revenue: '$0',
-                                status: 'Pending'
-                            }
-                        ].map((distributor, i) => (
-                            <tr key={i} className="hover:bg-gray-50">
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="text-sm font-medium text-gray-900">{distributor.name}</div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="text-sm text-gray-900">{distributor.contact}</div>
-                                    <div className="text-sm text-gray-500">{distributor.email}</div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {distributor.region}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {distributor.orders}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    {distributor.revenue}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`px-2 py-1 text-xs rounded-full ${distributor.status === 'Active' ? 'bg-green-100 text-green-800' :
-                                        distributor.status === 'Inactive' ? 'bg-gray-100 text-gray-800' :
-                                            'bg-yellow-100 text-yellow-800'
-                                        }`}>
-                                        {distributor.status}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <button className="text-blue-600 hover:text-blue-900 mr-3">
-                                        <Eye className="h-4 w-4" />
-                                    </button>
-                                    <button className="text-indigo-600 hover:text-indigo-900 mr-3">
-                                        <Edit className="h-4 w-4" />
-                                    </button>
-                                    <button className="text-red-600 hover:text-red-900">
-                                        <Trash2 className="h-4 w-4" />
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            {/* Loading and Error States */}
+            {loading && (
+                <div className="flex justify-center items-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <span className="ml-2 text-gray-600">Loading distributors...</span>
+                </div>
+            )}
 
-            <div className="mt-6 flex items-center justify-between">
-                <div className="text-sm text-gray-600">
-                    Showing 5 of 254 distributors
+            {error && (
+                <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
+                    <div className="text-red-800">{error}</div>
                 </div>
-                <div className="flex space-x-2">
-                    <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md">
-                        Previous
-                    </button>
-                    <button className="px-3 py-1 bg-blue-600 text-white rounded-md">
-                        1
-                    </button>
-                    <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md">
-                        2
-                    </button>
-                    <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md">
-                        3
-                    </button>
-                    <button className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md">
-                        Next
-                    </button>
+            )}
+
+            {/* Customer/Distributor List */}
+            {!loading && !error && (
+                <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                            <tr>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Company & Owner
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Contact Info
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Location
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Joined Date
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status
+                                </th>
+                                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                            {filteredDistributors.length === 0 ? (
+                                <tr>
+                                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                                        {searchQueries.customers ? 'No distributors found matching your search.' : 'No distributors found.'}
+                                    </td>
+                                </tr>
+                            ) : (
+                                filteredDistributors.map((distributor) => (
+                                    <tr key={distributor.id} className="hover:bg-gray-50">
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-start">
+                                                <div className="flex-shrink-0 h-10 w-10">
+                                                    <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                                        <span className="text-sm font-medium text-blue-600">
+                                                            {distributor.companyName.substring(0, 2).toUpperCase()}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div className="ml-4">
+                                                    <div className="text-sm font-medium text-gray-900">
+                                                        {distributor.companyName}
+                                                    </div>
+                                                    <div className="text-sm text-gray-500">
+                                                        Owner: {distributor.ownerName}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="text-sm text-gray-900">
+                                                <div className="flex items-center mb-1">
+                                                    <Mail className="h-4 w-4 text-gray-400 mr-2" />
+                                                    <span className="truncate" style={{ maxWidth: '200px' }}>
+                                                        {distributor.email}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center">
+                                                    <Phone className="h-4 w-4 text-gray-400 mr-2" />
+                                                    <span>{distributor.phone}</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-start">
+                                                <MapPin className="h-4 w-4 text-gray-400 mr-2 mt-0.5 flex-shrink-0" />
+                                                <div className="text-sm text-gray-500 break-words" style={{ maxWidth: '200px' }}>
+                                                    {formatAddress(distributor.address)}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {formatDate(distributor.createdAt)}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                                                Active
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <div className="flex items-center justify-end space-x-2">
+                                                <button
+                                                    className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
+                                                    title="View Details"
+                                                >
+                                                    <Eye className="h-4 w-4" />
+                                                </button>
+                                                <button
+                                                    className="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-50"
+                                                    title="Edit Distributor"
+                                                >
+                                                    <Edit className="h-4 w-4" />
+                                                </button>
+                                                <button
+                                                    className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
+                                                    title="Delete Distributor"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
                 </div>
-            </div>
+            )}
+
+            {/* Pagination */}
+            {!loading && !error && filteredDistributors.length > 0 && (
+                <div className="mt-6 flex items-center justify-between">
+                    <div className="text-sm text-gray-600">
+                        Showing {filteredDistributors.length} of {totalDistributors} distributors
+                        {searchQueries.customers && (
+                            <span className="text-blue-600 ml-1">
+                                (filtered by "{searchQueries.customers}")
+                            </span>
+                        )}
+                    </div>
+                    <div className="flex space-x-2">
+                        <button
+                            className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 disabled:opacity-50"
+                            disabled={true} // Implement pagination logic here
+                        >
+                            Previous
+                        </button>
+                        <button className="px-3 py-1 bg-blue-600 text-white rounded-md">
+                            1
+                        </button>
+                        <button
+                            className="px-3 py-1 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 disabled:opacity-50"
+                            disabled={true} // Implement pagination logic here
+                        >
+                            Next
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

@@ -3,6 +3,7 @@ import prisma from "../../utils/prismaClient"
 import { StatusCode } from "../../types"
 import { distributor, pendingRegistration } from "@prisma/client"
 const verifyPendingRegistrationController = async (req: Request, res: Response): Promise<Response> => {
+    console.log('Verifying distributor:', req.body);
     const { email } = req.body;
 
     try {
