@@ -8,6 +8,7 @@ import checkAccessToken from '../../middlewares/token/checkAccessToken.middlewar
 import pendingDistributorsController from '../../controllers/auth/pendingDistributors.middlware';
 import checkAccessTokenMiddleware from '../../middlewares/token/checkAccessToken.middleware';
 import rejectDistributorController from '../../controllers/auth/rejectDistributor';
+import getProductsController from '../../controllers/products/getProductsController';
 
 
 const authRouter = express.Router();
@@ -15,6 +16,8 @@ const authRouter = express.Router();
 authRouter.post('/login', loginController);
 
 authRouter.post('/register', registerController);
+
+authRouter.get("/products",getProductsController)
 
 authRouter.post('/verifyDistributor', checkAccessTokenMiddleware, verifyPendingRegistrationController);
 
