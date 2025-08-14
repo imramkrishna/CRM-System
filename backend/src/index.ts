@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import adminRouter from "./routes/profile/adminRoutes";
 import distributorRouter from "./routes/profile/distributorRoutes";
+import productsRouter from "./routes/products/productsRoutes";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -59,6 +60,7 @@ app.use("/auth", authRouter)
 app.use("/profile", profileRouter);
 app.use("/admin", adminRouter);
 app.use("/distributor", distributorRouter);
+app.use("/products", productsRouter);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
