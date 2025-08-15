@@ -1059,7 +1059,7 @@ const DistributorDashboard = () => {
             case 'dashboard':
                 return renderDashboard();
             case 'orders':
-                return <Orders />;
+                return <Orders/>;
             case 'products':
                 return <Products />;
             case 'transaction-history':
