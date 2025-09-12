@@ -1,12 +1,31 @@
 export interface Product {
-    id: string;
+    id: number;
+    sku: string;
+    barcode: string;
     name: string;
     description: string;
-    image: string;
     category: string;
-    specifications: string[];
-    features: string[];
-    inStock: boolean;
+    brand: string;
+    color: string;
+    listPrice: string;
+    costPrice?: number;
+    stockQuantity: number;
+    reservedQuantity: number;
+    minOrderQuantity: number;
+    maxOrderQuantity: number | null;
+    weight: string;
+    dimensions: {
+        unit: string;
+        width: number;
+        height: number;
+        length: number;
+    };
+    isActive: boolean;
+    isDiscontinued: boolean;
+    dateOfManufacture: string | null;
+    dateOfExpiry: string | null;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface User {

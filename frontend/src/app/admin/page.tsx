@@ -67,6 +67,7 @@ import Reports from '@/components/admin/reports';
 import VerifyDistributor from '@/components/admin/verifyDistributor';
 import Payments from '@/components/admin/payments';
 import Quotations from '@/components/admin/quotations';
+import Inventory from '@/components/admin/inventory';
 // Make sure Customers is a valid React component that returns JSX
 
 const AdminDashboard = () => {
@@ -748,6 +749,8 @@ const AdminDashboard = () => {
                 return <Orders />;
             case 'manual-request':
                 return <ManualRequest />;
+            case 'inventory':
+                return <Inventory />;
             case 'purchases':
                 return <Purchases />;
             case 'quotation':

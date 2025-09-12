@@ -114,7 +114,7 @@ const Products = () => {
     const fetchProducts = async () => {
         setIsLoading(true);
         try {
-            const response = await get("/auth/products", {
+            const response = await get("/admin/getProducts", {
                 withCredentials: true
             });// Debug log
             setProducts(response.data.data.products)
