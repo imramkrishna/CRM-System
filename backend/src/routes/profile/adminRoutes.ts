@@ -5,7 +5,9 @@ import distributorController from "../../controllers/admin/distributorController
 import getOrdersController from "../../controllers/admin/getOrdersController";
 import addOrderController from "../../controllers/admin/addOrdersController";
 import addProductController from "../../controllers/admin/addProductController";
-
+import getProductsController from "../../controllers/products/getProductsController";
+import updateProductsController from "../../controllers/products/updateProducts";
+import checkAdminMiddleware from "../../middlewares/token/checkAdmin";
 const adminRouter = express.Router();
 adminRouter.use(checkAccessTokenMiddleware);
 // Admin dashboard route
@@ -14,5 +16,6 @@ adminRouter.get("/distributors", distributorController);
 adminRouter.post("/addOrder", addOrderController);
 adminRouter.get("/getOrders", getOrdersController);
 adminRouter.post("/addProduct", addProductController);
-
+adminRouter.get("/getProducts", getProductsController);
+adminRouter.put("/updateProduct", checkAdminMiddleware, updateProductsController);
 export default adminRouter;

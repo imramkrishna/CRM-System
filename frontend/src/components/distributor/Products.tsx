@@ -60,7 +60,6 @@ interface OrderItem {
 }
 
 interface OrderForm {
-    orderNumber: string;
     items: OrderItem[];
     notes: string;
     requestedDeliveryDate: string;
@@ -79,7 +78,6 @@ const Products = () => {
     const [showOrderModal, setShowOrderModal] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [orderForm, setOrderForm] = useState<OrderForm>({
-        orderNumber: '',
         items: [],
         notes: '',
         requestedDeliveryDate: ''
@@ -171,7 +169,6 @@ const Products = () => {
         setSelectedProduct(product);
         setOrderQuantity(product.minOrderQuantity);
         setOrderForm({
-            orderNumber: `ORD-${Date.now()}`,
             items: [],
             notes: '',
             requestedDeliveryDate: ''
@@ -192,7 +189,6 @@ const Products = () => {
             const lineTotal = calculateLineTotal(orderQuantity, unitPrice);
 
             const orderData = {
-                orderNumber: orderForm.orderNumber,
                 items: [{
                     productId: selectedProduct.id,
                     quantity: orderQuantity,
@@ -495,18 +491,7 @@ const Products = () => {
                             {/* Order Form */}
                             <div className="space-y-6">
                                 {/* Order Number */}
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        Order Number
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={orderForm.orderNumber}
-                                        onChange={(e) => setOrderForm(prev => ({ ...prev, orderNumber: e.target.value }))}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="Enter order number"
-                                    />
-                                </div>
+                                
 
                                 {/* Quantity */}
                                 <div>
@@ -612,7 +597,7 @@ const Products = () => {
                                     </button>
                                     <button
                                         onClick={submitOrder}
-                                        disabled={isSubmittingOrder || !orderForm.orderNumber.trim()}
+                                        disabled={isSubmittingOrder}
                                         className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                                     >
                                         {isSubmittingOrder ? (

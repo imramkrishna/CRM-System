@@ -23,7 +23,7 @@ const checkRefreshTokenMiddleware = async (req: Request, res: Response, next: Ne
     try {
         // Check if the refresh token exists in the database
         if (decoded.role !== "distributor" && decoded.role !== "admin") {
-            throw new Error("Invalid user role");
+            throw new Error("Invalid user");
         }
         if (decoded.role == "distributor") {
             const tokenRecord = await prisma.distributorLoginSessions.findFirst({
