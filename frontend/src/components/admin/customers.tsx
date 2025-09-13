@@ -19,6 +19,8 @@ import {
     FileText
 } from 'lucide-react';
 import { get, post, put } from "@/lib/api";
+import EditButton from "../ui/buttons/EditButton";
+import ViewButton from "../ui/buttons/ViewButton";
 
 interface Distributor {
     id: number;
@@ -46,7 +48,7 @@ const Customers = () => {
     const [showEditModal, setShowEditModal] = useState(false);
     const [showAddModal, setShowAddModal] = useState(false);
     const [selectedDistributor, setSelectedDistributor] = useState<Distributor | null>(null);
-    
+
     // Form states
     const [formData, setFormData] = useState({
         ownerName: '',
@@ -184,7 +186,7 @@ const Customers = () => {
                     'Content-Type': 'application/json'
                 }
             });
-            
+
             // Refresh the distributors list
             await fetchDistributors();
             setShowAddModal(false);
@@ -209,7 +211,7 @@ const Customers = () => {
     const handleSubmitEdit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!selectedDistributor) return;
-        
+
         setFormLoading(true);
         try {
             const updateData = {
@@ -228,7 +230,7 @@ const Customers = () => {
                     'Content-Type': 'application/json'
                 }
             });
-            
+
             // Refresh the distributors list
             await fetchDistributors();
             setShowEditModal(false);
@@ -272,7 +274,7 @@ const Customers = () => {
                             className="pl-10 pr-4 py-2 bg-gray-100 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm w-full text-gray-900 placeholder-gray-500"
                         />
                     </div>
-                    <button 
+                    <button
                         onClick={handleAddDistributor}
                         className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 transition-colors"
                     >
@@ -423,21 +425,13 @@ const Customers = () => {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div className="flex items-center justify-end space-x-2">
-                                                <button
+                                                <ViewButton
                                                     onClick={() => handleViewDistributor(distributor)}
-                                                    className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50 transition-colors"
-                                                    title="View Details"
-                                                >
-                                                    <Eye className="h-4 w-4" />
-                                                </button>
-                                                <button
+                                                />
+                                                <EditButton
                                                     onClick={() => handleEditDistributor(distributor)}
-                                                    className="text-indigo-600 hover:text-indigo-900 p-1 rounded hover:bg-indigo-50 transition-colors"
-                                                    title="Edit Distributor"
-                                                >
-                                                    <Edit className="h-4 w-4" />
-                                                </button>
-                                               
+                                                />
+
                                             </div>
                                         </td>
                                     </tr>
@@ -497,7 +491,7 @@ const Customers = () => {
                                 <X className="h-6 w-6" />
                             </button>
                         </div>
-                        
+
                         <div className="p-6 bg-gray-50">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {/* Basic Information Card */}
@@ -548,7 +542,7 @@ const Customers = () => {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             {/* Address Card - Full Width */}
                             <div className="bg-purple-50 rounded-xl p-4 border border-purple-100 mt-4">
                                 <div className="flex items-center gap-2 mb-3">
@@ -560,7 +554,7 @@ const Customers = () => {
                                 <p className="text-gray-900 font-medium">{selectedDistributor.address}</p>
                             </div>
                         </div>
-                        
+
                         <div className="px-6 py-4 bg-white border-t border-gray-200 rounded-b-2xl">
                             <div className="flex justify-end">
                                 <button
@@ -593,7 +587,7 @@ const Customers = () => {
                                 <X className="h-6 w-6" />
                             </button>
                         </div>
-                        
+
                         <form onSubmit={handleSubmitEdit} className="p-6 bg-gray-50 space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
@@ -658,7 +652,7 @@ const Customers = () => {
                                         Phone *
                                     </label>
                                     <div className="flex">
-                                       
+
                                         <div className="relative flex-1">
                                             <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                                             <input
@@ -735,7 +729,7 @@ const Customers = () => {
                                 <X className="h-6 w-6" />
                             </button>
                         </div>
-                        
+
                         <form onSubmit={handleSubmitAdd} className="p-6 space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
