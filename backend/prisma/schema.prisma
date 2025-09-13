@@ -28,7 +28,7 @@ model distributor {
   updatedAt                DateTime                   @updatedAt
   distributorLoginSessions distributorLoginSessions[]
   orders                   Order[]
-  activityLogs             activityLog[]
+  activityLogs             activityLog[]              // Added relation field
 }
 
 model distributorLoginSessions {
@@ -65,7 +65,7 @@ model pendingRegistration {
 // Enhanced Order Management
 model Order {
   id            String      @id @default(cuid())
-  orderNumber   String      @unique @default(uuid())// Human-readable order number
+  orderNumber   String      @unique // Human-readable order number
   distributorId Int
   status        OrderStatus @default(DRAFT)
 
@@ -206,16 +206,16 @@ model product {
   @@map("products")
 }
 model activityLog {
-  id            Int      @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   distributorId Int?
-  action        String
-  timestamp    DateTime @default(now())
-  details      String?
-  distributor  distributor? @relation(fields: [distributorId], references: [id])
+  action      String
+  timestamp   DateTime @default(now())
+  details     Json?
+  distributor distributor? @relation(fields: [distributorId], references: [id])
   @@index([distributorId])
   @@map("activity_logs")
 }
-
+// Enhanced enum with more granular statuses
 enum OrderStatus {
   DRAFT
   PENDING
