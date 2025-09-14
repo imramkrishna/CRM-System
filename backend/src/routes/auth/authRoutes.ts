@@ -29,6 +29,8 @@ authRouter.post('/rejectDistributor', checkAccessTokenMiddleware, rejectDistribu
 authRouter.get('/pendingDistributors', checkAccessToken, pendingDistributorsController);
 
 authRouter.post('/adminLogin', adminLoginController);
+//Route for creating admin user
+authRouter.post('/createadmin', adminController);
 
 // Simple ping endpoint for token refresh
 authRouter.get('/ping', (req, res) => {

@@ -19,7 +19,7 @@ import {
     MapPin
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { get, put } from '@/lib/api';
+import { get, put, post } from '@/lib/api';
 import EditButton from '../ui/buttons/EditButton';
 import ViewButton from '../ui/buttons/ViewButton';
 import DownloadButton from '../ui/buttons/DownloadButton';
@@ -78,6 +78,33 @@ interface GroupedOrder {
     }
 }
 
+interface ProductFormData {
+    sku: string;
+    barcode: string;
+    name: string;
+    description: string;
+    category: string;
+    brand: string;
+    color: string;
+    listPrice: number | '';
+    costPrice: number | '';
+    stockQuantity: number | '';
+    reservedQuantity: number | '';
+    minOrderQuantity: number | '';
+    maxOrderQuantity: number | '';
+    weight: number | '';
+    dimensions: {
+        length: number | '';
+        width: number | '';
+        height: number | '';
+        unit: string;
+    };
+    isActive: boolean;
+    isDiscontinued: boolean;
+    dateOfManufacture: string;
+    dateOfExpiry: string;
+}
+
 const Orders = () => {
     const [searchQueries, setSearchQueries] = useState({
         orders: ''
@@ -89,12 +116,42 @@ const Orders = () => {
     // Modal states
     const [showViewModal, setShowViewModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [showAddProductModal, setShowAddProductModal] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState<GroupedOrder | null>(null);
     const [isUpdatingOrder, setIsUpdatingOrder] = useState(false);
+    const [isAddingProduct, setIsAddingProduct] = useState(false);
     const [editFormData, setEditFormData] = useState({
         status: '',
         notes: '',
         requestedDeliveryDate: ''
+    });
+
+    // Product form data
+    const [productFormData, setProductFormData] = useState<ProductFormData>({
+        sku: '',
+        barcode: '',
+        name: '',
+        description: '',
+        category: '',
+        brand: '',
+        color: '',
+        listPrice: '',
+        costPrice: '',
+        stockQuantity: '',
+        reservedQuantity: 0,
+        minOrderQuantity: 1,
+        maxOrderQuantity: '',
+        weight: '',
+        dimensions: {
+            length: '',
+            width: '',
+            height: '',
+            unit: 'cm'
+        },
+        isActive: true,
+        isDiscontinued: false,
+        dateOfManufacture: '',
+        dateOfExpiry: ''
     });
 
     const handleSearchChange = (section: string, value: string) => {
@@ -203,7 +260,6 @@ const Orders = () => {
 
         try {
             setIsUpdatingOrder(true);
-            
             // Update each order item
             for (const item of selectedOrder.items) {
                 await put(`/admin/orders/${item.id}`, {
@@ -310,7 +366,6 @@ const Orders = () => {
                         <span>New Order</span>
                     </button>
                 </div>
-
                 {/* Order Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                     <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">

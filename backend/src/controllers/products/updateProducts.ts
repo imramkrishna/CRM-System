@@ -4,8 +4,12 @@ import { StatusCode } from "../../types";
 
 const updateProductsController = async (req: Request, res: Response): Promise<Response | void> => {
     try {
+        const { id } = req.params;
+        if (!id) {
+            return res.status(StatusCode.BAD_REQUEST).json({ error: "Product ID is required" });
+        }
+        // Parse id to ensure it's a number
         const {
-            id,
             sku,
             barcode,
             name,
@@ -25,7 +29,7 @@ const updateProductsController = async (req: Request, res: Response): Promise<Re
 
         // Check if the product exists
         const existingProduct = await prisma.product.findUnique({
-            where: { id: id.toString() }
+            where: { id: Number(id) }
         });
 
         if (!existingProduct) {
@@ -34,7 +38,7 @@ const updateProductsController = async (req: Request, res: Response): Promise<Re
 
         // Update the product
         const updatedProduct = await prisma.product.update({
-            where: { id: id.toString() },
+            where: { id: Number(id) },
             data: {
                 sku,
                 barcode,
