@@ -7,6 +7,7 @@ import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAppDispatch } from '@/lib/hooks';
 import { loginStart, loginSuccess, loginFailure, type User } from '@/lib/slices/authSlice';
 import { post } from '@/lib/api';
+import { useCommonToasts } from '@/hooks/useCommonToasts';
 interface LoginFormProps {
     type: 'admin' | 'distributor';
     title: string;
@@ -14,6 +15,7 @@ interface LoginFormProps {
 }
 
 const LoginForm = ({ type, title, subtitle }: LoginFormProps) => {
+    const { showLoginSuccess, showLoginError } = useCommonToasts();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -43,6 +45,7 @@ const LoginForm = ({ type, title, subtitle }: LoginFormProps) => {
                     role: 'admin',
                 };
                 dispatch(loginSuccess(normalizedUser));
+                showLoginSuccess();
                 router.replace('/admin');
             } else {
                 const response = await post('/auth/login', {
@@ -57,12 +60,14 @@ const LoginForm = ({ type, title, subtitle }: LoginFormProps) => {
                     role: 'distributor',
                 };
                 dispatch(loginSuccess(normalizedUser));
+                showLoginSuccess();
                 router.replace('/distributor');
             }
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Login failed';
             setError(errorMessage);
             dispatch(loginFailure(errorMessage));
+            showLoginError();
         } finally {
             setIsLoading(false);
         }
