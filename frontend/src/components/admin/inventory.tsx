@@ -29,12 +29,14 @@ import { get, put, post, del } from '@/lib/api';
 import ViewButton from '../ui/buttons/ViewButton';
 import EditButton from '../ui/buttons/EditButton';
 import DeleteButton from '../ui/buttons/DeleteButton';
+import { useCommonToasts } from '@/hooks/useCommonToasts';
 
 interface EditModalProps {
     product: Product;
     isOpen: boolean;
     onClose: () => void;
     onSave: (updatedProduct: Product) => void;
+    onError: (action: string) => void;
 }
 
 interface ViewModalProps {
@@ -47,6 +49,7 @@ interface AddProductModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSave: (product: Product) => void;
+    onError: (action: string) => void;
 }
 
 interface ProductFormData {
@@ -316,7 +319,7 @@ const ViewProductModal = ({ product, isOpen, onClose }: ViewModalProps) => {
     );
 };
 
-const AddProductModal = ({ isOpen, onClose, onSave }: AddProductModalProps) => {
+const AddProductModal = ({ isOpen, onClose, onSave, onError }: AddProductModalProps) => {
     const [formData, setFormData] = useState<ProductFormData>({
         sku: '',
         barcode: '',
@@ -422,7 +425,7 @@ const AddProductModal = ({ isOpen, onClose, onSave }: AddProductModalProps) => {
             }
         } catch (error) {
             console.error('Error adding product:', error);
-            alert('Failed to add product. Please try again.');
+            onError('add');
         } finally {
             setIsLoading(false);
         }
@@ -856,7 +859,7 @@ const AddProductModal = ({ isOpen, onClose, onSave }: AddProductModalProps) => {
     );
 };
 
-const EditProductModal = ({ product, isOpen, onClose, onSave }: EditModalProps) => {
+const EditProductModal = ({ product, isOpen, onClose, onSave, onError }: EditModalProps) => {
     const [editedProduct, setEditedProduct] = useState<Product>(product);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -872,6 +875,7 @@ const EditProductModal = ({ product, isOpen, onClose, onSave }: EditModalProps) 
             onClose();
         } catch (error) {
             console.error('Error updating product:', error);
+            onError('update');
         } finally {
             setIsLoading(false);
         }
@@ -1166,6 +1170,15 @@ const Inventory = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
+    // Toast notifications
+    const {
+        showProductAdded,
+        showProductDeleted,
+        showProductUpdated,
+        showProductError,
+        showError
+    } = useCommonToasts();
+
     const fetchProducts = async () => {
         setIsLoading(true);
         try {
@@ -1187,10 +1200,12 @@ const Inventory = () => {
                 product.id === updatedProduct.id ? updatedProduct : product
             )
         );
+        showProductUpdated(updatedProduct.name);
     };
 
     const handleProductAdd = (newProduct: Product) => {
         setProducts(prevProducts => [newProduct, ...prevProducts]);
+        showProductAdded(newProduct.name);
     };
 
     const handleEditProduct = (product: Product) => {
@@ -1204,6 +1219,10 @@ const Inventory = () => {
     };
 
     const handleDeleteProduct = async (productId: number) => {
+        // Find the product to get its name for the toast
+        const productToDelete = products.find(p => p.id === productId);
+        const productName = productToDelete?.name;
+
         if (!confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
             return;
         }
@@ -1214,10 +1233,10 @@ const Inventory = () => {
             });
 
             setProducts(prevProducts => prevProducts.filter(product => product.id !== productId));
-            alert('Product deleted successfully!');
+            showProductDeleted(productName);
         } catch (error) {
             console.error('Error deleting product:', error);
-            alert('Failed to delete product. Please try again.');
+            showProductError('delete');
         }
     };
 
@@ -1474,6 +1493,7 @@ const Inventory = () => {
                 isOpen={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
                 onSave={handleProductAdd}
+                onError={showProductError}
             />
             
             {selectedProduct && (
@@ -1486,6 +1506,7 @@ const Inventory = () => {
                             setSelectedProduct(null);
                         }}
                         onSave={handleProductUpdate}
+                        onError={showProductError}
                     />
                     <ViewProductModal
                         product={selectedProduct}

@@ -1,7 +1,7 @@
 'use client';
 
-import React, { createContext, useContext, useState, useCallback } from 'react';
-import { Check, X, AlertTriangle, Info, XCircle } from 'lucide-react';
+import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 
 export interface Toast {
@@ -28,7 +28,11 @@ export const useToast = () => {
     return context;
 };
 
-export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+interface ToastProviderProps {
+    children: ReactNode;
+}
+
+export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
     const [toasts, setToasts] = useState<Toast[]>([]);
 
     const removeToast = useCallback((id: string) => {
@@ -36,7 +40,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }, []);
 
     const addToast = useCallback((message: string, type: ToastType, duration = 5000) => {
-        const id = Math.random().toString(36).substr(2, 9);
+        const id = Math.random().toString(36).substring(2, 9);
         const newToast: Toast = { id, message, type, duration };
 
         setToasts(prev => [...prev, newToast]);
@@ -53,8 +57,15 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setToasts([]);
     }, []);
 
+    const value: ToastContextValue = {
+        toasts,
+        addToast,
+        removeToast,
+        clearToasts
+    };
+
     return (
-        <ToastContext.Provider value={{ toasts, addToast, removeToast, clearToasts }}>
+        <ToastContext.Provider value={value}>
             {children}
         </ToastContext.Provider>
     );
