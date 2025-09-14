@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ReduxProvider } from "@/lib/providers";
 import { AuthProvider } from "@/components/auth/AuthProvider";
+import { ToastProvider } from "@/contexts/ToastContext";
+import { ToastContainer } from "@/config/toast";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -25,9 +27,14 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable} font-sans antialiased`} suppressHydrationWarning>
         <ReduxProvider>
-          <AuthProvider>
-            {children}
-          </AuthProvider>
+          
+            <AuthProvider>
+              <ToastProvider>
+                {children}
+                <ToastContainer />
+              </ToastProvider>
+            </AuthProvider>
+          
         </ReduxProvider>
       </body>
     </html>
