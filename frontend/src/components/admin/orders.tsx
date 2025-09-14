@@ -7,13 +7,15 @@ import {
     Download,
     Eye,
     Edit,
-    Trash2,
     Check,
     Clock,
     ArrowUpRight
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { get } from '@/lib/api';
+import EditButton from '../ui/buttons/EditButton';
+import ViewButton from '../ui/buttons/ViewButton';
+import DownloadButton from '../ui/buttons/DownloadButton';
 
 interface OrderItem {
     id: string;
@@ -140,6 +142,18 @@ const Orders = () => {
                 <div className="text-lg text-gray-600">Loading orders...</div>
             </div>
         );
+    }
+    const handleViewOrder = (order:GroupedOrder) => {
+        // Implement view order logic
+        console.log('View order:', order);
+    }
+    const handleEditOrder = (order:GroupedOrder) => {
+        // Implement edit order logic
+        console.log('Edit order:', order);
+    }
+    const handleDownloadOrder = (order:GroupedOrder ) => {
+        // Implement download order logic
+        console.log('Download order:', order);
     }
     return (
         <div className="space-y-6">
@@ -290,15 +304,9 @@ const Orders = () => {
                                         {new Date(order.createdAt).toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                                        <button className="text-blue-600 hover:text-blue-900 p-1 rounded-md hover:bg-blue-50">
-                                            <Eye className="h-4 w-4" />
-                                        </button>
-                                        <button className="text-green-600 hover:text-green-900 p-1 rounded-md hover:bg-green-50">
-                                            <Edit className="h-4 w-4" />
-                                        </button>
-                                        <button className="text-gray-600 hover:text-gray-900 p-1 rounded-md hover:bg-gray-50">
-                                            <Download className="h-4 w-4" />
-                                        </button>
+                                        <ViewButton onClick={() => handleViewOrder(order)}/>
+                                        <EditButton onClick={() => handleEditOrder(order)}/>
+                                        <DownloadButton onClick={() => handleDownloadOrder(order)}/>
                                     </td>
                                 </tr>
                             ))}

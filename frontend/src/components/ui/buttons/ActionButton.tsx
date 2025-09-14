@@ -23,9 +23,9 @@ const ActionButton: React.FC<ActionButtonProps> = ({
     const getVariantClasses = () => {
         switch (variant) {
             case 'view':
-                return 'text-blue-600 hover:text-blue-900 hover:bg-blue-50 border-blue-200';
+                return 'text-green-600 hover:text-blue-900 hover:bg-blue-50 border-blue-200';
             case 'edit':
-                return 'text-indigo-600 hover:text-indigo-900 hover:bg-indigo-50 border-indigo-200';
+                return 'text-purple-600 hover:text-indigo-900 hover:bg-indigo-50 border-indigo-200';
             case 'delete':
                 return 'text-red-600 hover:text-red-900 hover:bg-red-50 border-red-200';
             case 'add':
