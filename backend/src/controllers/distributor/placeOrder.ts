@@ -5,17 +5,14 @@ import { StatusCode } from "../../types";
 const placeOrderController = async (req: Request, res: Response): Promise<Response | void> => {
     try {
         const {
-            orderNumber,
+            distributorId,
             items,
             notes,
-            internalNotes,
             requestedDeliveryDate
         } = req.body;
 
-        // distributorId comes from req.user (set by middleware)
-        const distributorId = req.user?.id;
-        if (!orderNumber || !distributorId || !items || items.length === 0) {
-            return res.status(StatusCode.BAD_REQUEST).json({ error: "Invalid order data" });
+        if (!distributorId || !items || items.length === 0) {
+            return res.status(StatusCode.BAD_REQUEST).json({ error: "Invalid order" });
         }
 
         // Validate that all required item fields are present
@@ -56,14 +53,12 @@ const placeOrderController = async (req: Request, res: Response): Promise<Respon
         // Create the order with all required fields
         const order = await prisma.order.create({
             data: {
-                orderNumber,
                 distributorId: parseInt(distributorId.toString()),
                 subTotal,
                 taxAmount,
                 discountAmount: totalDiscountAmount,
                 totalAmount,
                 notes,
-                internalNotes,
                 requestedDeliveryDate: requestedDeliveryDate ? new Date(requestedDeliveryDate) : null,
                 orderItems: {
                     create: items.map((item: any) => {

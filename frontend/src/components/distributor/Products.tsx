@@ -17,6 +17,9 @@ import {
 import { useState, useEffect } from 'react';
 import { get, post } from '@/lib/api';
 import { useRouter } from 'next/navigation';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/lib/store';
+import { useCommonToasts } from '@/hooks/useCommonToasts';
 import ProductDetail from '@/components/products/productDetail';
 
 interface Product {
@@ -67,6 +70,8 @@ interface OrderForm {
 
 const Products = () => {
     const router = useRouter();
+    const user = useSelector((state: RootState) => state.auth.user);
+    const { showOrderPlaced } = useCommonToasts();
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All Products');
     const [selectedBrand, setSelectedBrand] = useState('');
@@ -181,7 +186,7 @@ const Products = () => {
     };
 
     const submitOrder = async () => {
-        if (!selectedProduct) return;
+        if (!selectedProduct || !user) return;
 
         setIsSubmittingOrder(true);
         try {
@@ -189,6 +194,7 @@ const Products = () => {
             const lineTotal = calculateLineTotal(orderQuantity, unitPrice);
 
             const orderData = {
+                distributorId: user.id,
                 items: [{
                     productId: selectedProduct.id,
                     quantity: orderQuantity,
@@ -206,7 +212,7 @@ const Products = () => {
                 withCredentials: true
             });
 
-            alert("Order placed successfully!");
+            showOrderPlaced();
             setShowOrderModal(false);
             setSelectedProduct(null);
         } catch (error) {

@@ -65,9 +65,11 @@ model pendingRegistration {
 // Enhanced Order Management
 model Order {
   id            String      @id @default(cuid())
-  orderNumber   String      @unique // Human-readable order number
-  distributorId Int
-  status        OrderStatus @default(DRAFT)
+  orderNumber   String      @unique @default(uuid()) // Human-readable order number
+  distributorId Int?
+  //for sample orders and checking functionality
+  specialOrder Boolean @default(false)
+  status        OrderStatus @default(PENDING)
 
   // Financial calculations with Decimal for precision
   subTotal       Decimal @db.Decimal(10, 2)
@@ -90,7 +92,7 @@ model Order {
   updatedAt DateTime @updatedAt
 
   // Relations
-  distributor  distributor    @relation(fields: [distributorId], references: [id])
+  distributor  distributor?    @relation(fields: [distributorId], references: [id])
   orderItems   OrderItem[]
   orderHistory OrderHistory[]
 
@@ -217,15 +219,8 @@ model activityLog {
 }
 // Enhanced enum with more granular statuses
 enum OrderStatus {
-  DRAFT
   PENDING
-  APPROVED
-  REJECTED
-  PROCESSING
-  READY_TO_SHIP
   SHIPPED
   DELIVERED
   CANCELLED
-  RETURNED
-  PARTIALLY_FULFILLED
 }

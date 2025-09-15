@@ -1,17 +1,11 @@
 import {
     X,
     Package,
-    Calendar,
-    FileText,
-    DollarSign,
     Edit2,
     Save,
-    Trash2,
-    User,
     Clock,
     CheckCircle,
-    XCircle,
-    AlertTriangle,
+    XCircle, 
     Loader2,
     RefreshCw
 } from 'lucide-react';

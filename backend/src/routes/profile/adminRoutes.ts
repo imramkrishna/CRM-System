@@ -21,5 +21,6 @@ adminRouter.post("/addProduct", addProductController);
 adminRouter.get("/getProducts", getProductsController);
 adminRouter.put("/updateProduct/:id", checkAdminMiddleware, updateProductsController);
 adminRouter.put("/updatedistributor/:id", checkAdminMiddleware, updateDistributorController);
-adminRouter.delete("/deleteProduct/:id", checkAdminMiddleware,deleteProductController )
+adminRouter.delete("/deleteProduct/:id", checkAdminMiddleware,deleteProductController);
+
 export default adminRouter;

@@ -20,10 +20,18 @@ import {
     ChevronLeft,
     ChevronRight,
     DollarSign,
-    FileText
+    FileText,
+    X,
+    Minus,
+    Loader2
 } from 'lucide-react';
 import { get, put, del } from '@/lib/api';
 import OrderDetails from './OrderDetails';
+import { useRouter } from 'next/navigation';
+import { useAppSelector } from '@/lib/hooks';
+import ViewButton from '@/components/ui/buttons/ViewButton';
+import EditButton from '@/components/ui/buttons/EditButton';
+import DeleteButton from '@/components/ui/buttons/DeleteButton';
 
 interface OrderItem {
     id: string;
@@ -68,7 +76,768 @@ interface Order {
     orderItems: OrderItem[];
 }
 
+// Place Order Modal Component
+interface PlaceOrderModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onPlaceOrder: (orderData: any) => Promise<void>;
+}
+
+interface Product {
+    id: number;
+    sku: string;
+    name: string;
+    description: string;
+    category: string;
+    brand: string;
+    listPrice: string;
+    stockQuantity: number;
+    minOrderQuantity: number;
+    maxOrderQuantity: number | null;
+    isActive: boolean;
+}
+
+interface OrderItemInput {
+    productId: number;
+    quantity: number;
+    unitPrice: number;
+    listPrice: number;
+    discountPercent: number;
+    discountAmount: number;
+    lineTotal: number;
+}
+
+const PlaceOrderModal: React.FC<PlaceOrderModalProps> = ({ isOpen, onClose, onPlaceOrder }) => {
+    const [products, setProducts] = useState<Product[]>([]);
+    const [selectedItems, setSelectedItems] = useState<OrderItemInput[]>([]);
+    const [notes, setNotes] = useState('');
+    const [requestedDeliveryDate, setRequestedDeliveryDate] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [showProductSelector, setShowProductSelector] = useState(false);
+    
+    // Get current user from auth state
+    const { user } = useAppSelector((state) => state.auth);
+
+    // Fetch products when modal opens
+    useEffect(() => {
+        if (isOpen) {
+            fetchProducts();
+        }
+    }, [isOpen]);
+
+    const fetchProducts = async () => {
+        try {
+            const response = await get('/distributor/get-orders', { withCredentials: true });
+            setProducts(response.data.filter((p: Product) => p.isActive));
+        } catch (error) {
+            console.error('Error fetching products:', error);
+        }
+    };
+
+    const addProductToOrder = (product: Product) => {
+        const existingItem = selectedItems.find(item => item.productId === product.id);
+        if (existingItem) {
+            updateQuantity(product.id, existingItem.quantity + 1);
+        } else {
+            const unitPrice = parseFloat(product.listPrice);
+            const quantity = product.minOrderQuantity || 1;
+            const lineTotal = unitPrice * quantity;
+            
+            const newItem: OrderItemInput = {
+                productId: product.id,
+                quantity,
+                unitPrice,
+                listPrice: unitPrice,
+                discountPercent: 0,
+                discountAmount: 0,
+                lineTotal
+            };
+            
+            setSelectedItems([...selectedItems, newItem]);
+        }
+        setShowProductSelector(false);
+    };
+
+    const updateQuantity = (productId: number, newQuantity: number) => {
+        if (newQuantity <= 0) {
+            removeItem(productId);
+            return;
+        }
+
+        setSelectedItems(items =>
+            items.map(item => {
+                if (item.productId === productId) {
+                    const lineTotal = item.unitPrice * newQuantity;
+                    return { ...item, quantity: newQuantity, lineTotal };
+                }
+                return item;
+            })
+        );
+    };
+
+    const updateDiscount = (productId: number, discountPercent: number) => {
+        setSelectedItems(items =>
+            items.map(item => {
+                if (item.productId === productId) {
+                    const subtotal = item.unitPrice * item.quantity;
+                    const discountAmount = (subtotal * discountPercent) / 100;
+                    const lineTotal = subtotal - discountAmount;
+                    return { 
+                        ...item, 
+                        discountPercent, 
+                        discountAmount,
+                        lineTotal 
+                    };
+                }
+                return item;
+            })
+        );
+    };
+
+    const removeItem = (productId: number) => {
+        setSelectedItems(items => items.filter(item => item.productId !== productId));
+    };
+
+    const handleSubmit = async () => {
+        if (selectedItems.length === 0) {
+            alert('Please add at least one item to the order');
+            return;
+        }
+
+        if (!user?.id) {
+            alert('User not authenticated. Please log in again.');
+            return;
+        }
+
+        try {
+            setLoading(true);
+            
+            const orderData = {
+                distributorId: parseInt(user.id), // Use actual user ID from auth state
+                items: selectedItems,
+                notes: notes || null,
+                requestedDeliveryDate: requestedDeliveryDate || null
+            };
+
+            await onPlaceOrder(orderData);
+            
+            // Reset form
+            setSelectedItems([]);
+            setNotes('');
+            setRequestedDeliveryDate('');
+            onClose();
+        } catch (error) {
+            console.error('Error placing order:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const filteredProducts = products.filter(product =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.sku.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const getProductById = (productId: number) => products.find(p => p.id === productId);
+
+    const calculateTotal = () => {
+        return selectedItems.reduce((sum, item) => sum + item.lineTotal, 0);
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
+                {/* Header */}
+                <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-lg font-bold text-gray-900">Place New Order</h3>
+                    <button
+                        onClick={onClose}
+                        className="text-gray-400 hover:text-gray-600"
+                    >
+                        <X className="h-6 w-6" />
+                    </button>
+                </div>
+
+                {/* Order Items */}
+                <div className="mb-6">
+                    <div className="flex justify-between items-center mb-4">
+                        <h4 className="text-md font-semibold text-gray-700">Order Items</h4>
+                        <button
+                            onClick={() => setShowProductSelector(true)}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+                        >
+                            <Plus className="h-4 w-4" />
+                            <span>Add Product</span>
+                        </button>
+                    </div>
+
+                    {selectedItems.length === 0 ? (
+                        <div className="text-center py-8 text-gray-500">
+                            <Package className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                            <p>No items added yet</p>
+                            <p className="text-sm">Click "Add Product" to start building your order</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4 max-h-60 overflow-y-auto">
+                            {selectedItems.map((item) => {
+                                const product = getProductById(item.productId);
+                                return (
+                                    <div key={item.productId} className="border rounded-lg p-4">
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex-1">
+                                                <h5 className="font-medium text-gray-900">{product?.name}</h5>
+                                                <p className="text-sm text-gray-500">SKU: {product?.sku}</p>
+                                                <p className="text-sm text-gray-600">${item.unitPrice.toFixed(2)} per unit</p>
+                                            </div>
+                                            <button
+                                                onClick={() => removeItem(item.productId)}
+                                                className="text-red-500 hover:text-red-700"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                        
+                                        <div className="grid grid-cols-3 gap-4 mt-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700">Quantity</label>
+                                                <input
+                                                    type="number"
+                                                    min="1"
+                                                    value={item.quantity}
+                                                    onChange={(e) => updateQuantity(item.productId, parseInt(e.target.value) || 1)}
+                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700">Discount %</label>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    max="100"
+                                                    step="0.1"
+                                                    value={item.discountPercent}
+                                                    onChange={(e) => updateDiscount(item.productId, parseFloat(e.target.value) || 0)}
+                                                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700">Line Total</label>
+                                                <div className="mt-1 px-3 py-2 bg-gray-50 border border-gray-300 rounded-md text-gray-900">
+                                                    ${item.lineTotal.toFixed(2)}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+
+                {/* Order Details */}
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
+                        <textarea
+                            value={notes}
+                            onChange={(e) => setNotes(e.target.value)}
+                            placeholder="Special instructions or notes..."
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            rows={3}
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Requested Delivery Date (Optional)</label>
+                        <input
+                            type="date"
+                            value={requestedDeliveryDate}
+                            onChange={(e) => setRequestedDeliveryDate(e.target.value)}
+                            min={new Date().toISOString().split('T')[0]}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        />
+                    </div>
+                </div>
+
+                {/* Order Summary */}
+                {selectedItems.length > 0 && (
+                    <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                        <h4 className="font-semibold text-gray-900 mb-2">Order Summary</h4>
+                        <div className="flex justify-between text-lg font-bold">
+                            <span>Total Amount:</span>
+                            <span>${calculateTotal().toFixed(2)}</span>
+                        </div>
+                    </div>
+                )}
+
+                {/* Actions */}
+                <div className="flex justify-end space-x-3">
+                    <button
+                        onClick={onClose}
+                        className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={handleSubmit}
+                        disabled={loading || selectedItems.length === 0}
+                        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                    >
+                        {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+                        <span>{loading ? 'Placing Order...' : 'Place Order'}</span>
+                    </button>
+                </div>
+
+                {/* Product Selector Modal */}
+                {showProductSelector && (
+                    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-60">
+                        <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-lg font-bold text-gray-900">Select Product</h3>
+                                <button
+                                    onClick={() => setShowProductSelector(false)}
+                                    className="text-gray-400 hover:text-gray-600"
+                                >
+                                    <X className="h-6 w-6" />
+                                </button>
+                            </div>
+
+                            <div className="mb-4">
+                                <input
+                                    type="text"
+                                    placeholder="Search products..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                />
+                            </div>
+
+                            <div className="max-h-96 overflow-y-auto">
+                                {filteredProducts.map((product) => (
+                                    <div
+                                        key={product.id}
+                                        className="border rounded-lg p-4 mb-2 hover:bg-gray-50 cursor-pointer"
+                                        onClick={() => addProductToOrder(product)}
+                                    >
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <h4 className="font-medium text-gray-900">{product.name}</h4>
+                                                <p className="text-sm text-gray-500">SKU: {product.sku}</p>
+                                                <p className="text-sm text-gray-600">{product.description}</p>
+                                                <p className="text-sm text-blue-600 font-medium">${parseFloat(product.listPrice).toFixed(2)}</p>
+                                            </div>
+                                            <div className="text-right text-sm text-gray-500">
+                                                <p>Stock: {product.stockQuantity}</p>
+                                                <p>Min Qty: {product.minOrderQuantity}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+// View Order Modal Component
+interface ViewOrderModalProps {
+    order: Order;
+    isOpen: boolean;
+    onClose: () => void;
+}
+
+const ViewOrderModal: React.FC<ViewOrderModalProps> = ({ order, isOpen, onClose }) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                <div className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
+                    {/* Header */}
+                    <div className="bg-white px-6 py-4 border-b border-gray-200">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-900">Order Details</h3>
+                                <p className="text-sm text-gray-600">Order #{order.orderNumber}</p>
+                            </div>
+                            <button
+                                onClick={onClose}
+                                className="text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                <X className="h-6 w-6" />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="bg-white px-6 py-4 max-h-96 overflow-y-auto">
+                        {/* Order Info Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            {/* Order Summary Card */}
+                            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                                <h4 className="font-semibold text-blue-900 mb-3 flex items-center">
+                                    <Package className="h-4 w-4 mr-2" />
+                                    Order Summary
+                                </h4>
+                                <div className="space-y-2 text-sm">
+                                    <div className="flex justify-between">
+                                        <span className="text-blue-700">Status:</span>
+                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${order.status === 'APPROVED' ? 'bg-green-100 text-green-800' : order.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}`}>
+                                            {order.status}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-blue-700">Subtotal:</span>
+                                        <span className="font-medium">${parseFloat(order.subTotal).toFixed(2)}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-blue-700">Tax:</span>
+                                        <span className="font-medium">${parseFloat(order.taxAmount).toFixed(2)}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-blue-700">Discount:</span>
+                                        <span className="font-medium">-${parseFloat(order.discountAmount).toFixed(2)}</span>
+                                    </div>
+                                    <div className="border-t border-blue-200 pt-2">
+                                        <div className="flex justify-between">
+                                            <span className="font-semibold text-blue-900">Total:</span>
+                                            <span className="font-bold text-blue-900">${parseFloat(order.totalAmount).toFixed(2)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Order Details Card */}
+                            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                                    <Calendar className="h-4 w-4 mr-2" />
+                                    Order Information
+                                </h4>
+                                <div className="space-y-2 text-sm">
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">Created:</span>
+                                        <span className="font-medium">{new Date(order.createdAt).toLocaleDateString()}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">Updated:</span>
+                                        <span className="font-medium">{new Date(order.updatedAt).toLocaleDateString()}</span>
+                                    </div>
+                                    {order.requestedDeliveryDate && (
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600">Delivery Date:</span>
+                                            <span className="font-medium">{new Date(order.requestedDeliveryDate).toLocaleDateString()}</span>
+                                        </div>
+                                    )}
+                                    {order.approvedAt && (
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600">Approved:</span>
+                                            <span className="font-medium">{new Date(order.approvedAt).toLocaleDateString()}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Order Items */}
+                        <div className="mb-6">
+                            <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+                                <Package className="h-4 w-4 mr-2" />
+                                Order Items ({order.orderItems.length})
+                            </h4>
+                            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                                <div className="overflow-x-auto">
+                                    <table className="min-w-full divide-y divide-gray-200">
+                                        <thead className="bg-gray-50">
+                                            <tr>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qty</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+                                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="bg-white divide-y divide-gray-200">
+                                            {order.orderItems.map((item) => (
+                                                <tr key={item.id} className="hover:bg-gray-50">
+                                                    <td className="px-4 py-3">
+                                                        <div>
+                                                            <div className="text-sm font-medium text-gray-900">{item.productName}</div>
+                                                            <div className="text-sm text-gray-500">{item.productBrand}</div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm text-gray-900">{item.productSku}</td>
+                                                    <td className="px-4 py-3 text-sm text-gray-900">{item.quantity}</td>
+                                                    <td className="px-4 py-3 text-sm text-gray-900">${parseFloat(item.unitPrice).toFixed(2)}</td>
+                                                    <td className="px-4 py-3 text-sm font-medium text-gray-900">${parseFloat(item.lineTotal).toFixed(2)}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Notes */}
+                        {order.notes && (
+                            <div className="mb-4">
+                                <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
+                                    <FileText className="h-4 w-4 mr-2" />
+                                    Order Notes
+                                </h4>
+                                <div className="bg-yellow-50 rounded-lg p-3 border border-yellow-200">
+                                    <p className="text-sm text-gray-700">{order.notes}</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Footer */}
+                    <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+                        <div className="flex justify-end">
+                            <button
+                                onClick={onClose}
+                                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-medium"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// Edit Order Modal Component
+interface EditOrderModalProps {
+    order: Order;
+    isOpen: boolean;
+    onClose: () => void;
+    onUpdate: (order: Order) => void;
+}
+
+const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, isOpen, onClose, onUpdate }) => {
+    const [editedOrder, setEditedOrder] = useState<Order>(order);
+    const [loading, setLoading] = useState(false);
+
+    if (!isOpen) return null;
+
+    const handleSave = async () => {
+        setLoading(true);
+        try {
+            const response = await put(`/distributor/update-order/${order.id}`, {
+                notes: editedOrder.notes,
+                requestedDeliveryDate: editedOrder.requestedDeliveryDate,
+                orderItems: editedOrder.orderItems
+            }, { withCredentials: true });
+
+            onUpdate(response.data.order);
+            alert('Order updated successfully!');
+            onClose();
+        } catch (error) {
+            console.error('Error updating order:', error);
+            alert('Failed to update order. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                <div className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
+                    {/* Header */}
+                    <div className="bg-white px-6 py-4 border-b border-gray-200">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-900">Edit Order</h3>
+                                <p className="text-sm text-gray-600">Order #{order.orderNumber}</p>
+                            </div>
+                            <button
+                                onClick={onClose}
+                                className="text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                <X className="h-6 w-6" />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="bg-white px-6 py-4 max-h-96 overflow-y-auto">
+                        {/* Edit Form */}
+                        <div className="space-y-6">
+                            {/* Order Items (Read-only for now) */}
+                            <div>
+                                <h4 className="font-semibold text-gray-900 mb-3">Order Items</h4>
+                                <div className="bg-gray-50 rounded-lg p-4 border">
+                                    <p className="text-sm text-gray-600 mb-2">
+                                        {order.orderItems.length} item(s) - Total: ${parseFloat(order.totalAmount).toFixed(2)}
+                                    </p>
+                                    <div className="space-y-2">
+                                        {order.orderItems.map((item) => (
+                                            <div key={item.id} className="flex justify-between items-center text-sm">
+                                                <span>{item.productName} x {item.quantity}</span>
+                                                <span className="font-medium">${parseFloat(item.lineTotal).toFixed(2)}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Delivery Date */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Requested Delivery Date
+                                </label>
+                                <input
+                                    type="date"
+                                    value={editedOrder.requestedDeliveryDate ? editedOrder.requestedDeliveryDate.split('T')[0] : ''}
+                                    onChange={(e) => setEditedOrder(prev => ({
+                                        ...prev,
+                                        requestedDeliveryDate: e.target.value
+                                    }))}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                            </div>
+
+                            {/* Notes */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Order Notes
+                                </label>
+                                <textarea
+                                    value={editedOrder.notes || ''}
+                                    onChange={(e) => setEditedOrder(prev => ({
+                                        ...prev,
+                                        notes: e.target.value
+                                    }))}
+                                    rows={4}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="Add any special instructions or notes..."
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+                        <div className="flex justify-end space-x-3">
+                            <button
+                                onClick={onClose}
+                                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSave}
+                                disabled={loading}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium disabled:bg-blue-300 flex items-center space-x-2"
+                            >
+                                {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+                                <span>{loading ? 'Saving...' : 'Save Changes'}</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// Delete Confirmation Modal Component
+interface DeleteConfirmModalProps {
+    order: Order;
+    isOpen: boolean;
+    onClose: () => void;
+    onConfirm: () => void;
+}
+
+const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({ order, isOpen, onClose, onConfirm }) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                <div className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                    {/* Header */}
+                    <div className="bg-white px-6 py-4 border-b border-gray-200">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-lg font-semibold text-red-600 flex items-center">
+                                <AlertTriangle className="h-5 w-5 mr-2" />
+                                Delete Order
+                            </h3>
+                            <button
+                                onClick={onClose}
+                                className="text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                <X className="h-6 w-6" />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="bg-white px-6 py-4">
+                        <div className="mb-4">
+                            <p className="text-sm text-gray-600 mb-4">
+                                Are you sure you want to delete this order? This action cannot be undone.
+                            </p>
+                            
+                            {/* Order Summary */}
+                            <div className="bg-red-50 rounded-lg p-4 border border-red-200">
+                                <h4 className="font-semibold text-red-900 mb-2">Order to be deleted:</h4>
+                                <div className="space-y-1 text-sm">
+                                    <div className="flex justify-between">
+                                        <span className="text-red-700">Order Number:</span>
+                                        <span className="font-medium">{order.orderNumber}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-red-700">Total Amount:</span>
+                                        <span className="font-medium">${parseFloat(order.totalAmount).toFixed(2)}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-red-700">Status:</span>
+                                        <span className="font-medium">{order.status}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-red-700">Items:</span>
+                                        <span className="font-medium">{order.orderItems.length} item(s)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="bg-gray-50 px-6 py-4 border-t border-gray-200">
+                        <div className="flex justify-end space-x-3">
+                            <button
+                                onClick={onClose}
+                                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={onConfirm}
+                                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium flex items-center space-x-2"
+                            >
+                                <Trash2 className="h-4 w-4" />
+                                <span>Delete Order</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const Orders = () => {
+    const router = useRouter();
     const [orders, setOrders] = useState<Order[]>([]);
     const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
@@ -81,6 +850,10 @@ const Orders = () => {
     const [ordersPerPage] = useState(10);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [showOrderDetails, setShowOrderDetails] = useState(false);
+    const [showViewModal, setShowViewModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
 
     // Fetch orders from backend
     const fetchOrders = useCallback(async () => {
@@ -90,8 +863,10 @@ const Orders = () => {
                 withCredentials: true
             });
             
-            // Ensure we always set an array
-            const ordersData = Array.isArray(response.data) ? response.data : [];
+            // Handle the API response structure with orders array
+            const ordersData = response.data?.orders && Array.isArray(response.data.orders) 
+                ? response.data.orders 
+                : [];
             setOrders(ordersData);
             setFilteredOrders(ordersData);
         } catch (error) {
@@ -253,6 +1028,46 @@ const Orders = () => {
         }
     };
 
+    // New handlers for view, edit, and delete modals
+    const handleViewOrderModal = (order: Order) => {
+        setSelectedOrder(order);
+        setShowViewModal(true);
+    };
+
+    const handleEditOrderModal = (order: Order) => {
+        setSelectedOrder(order);
+        setShowEditModal(true);
+    };
+
+    const handleDeleteOrderModal = (order: Order) => {
+        setOrderToDelete(order);
+        setShowDeleteConfirm(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!orderToDelete) return;
+        
+        try {
+            await del(`/distributor/cancel-order/${orderToDelete.id}`, {
+                withCredentials: true
+            });
+            
+            // Remove order from list
+            setOrders(prevOrders => 
+                prevOrders.filter(order => order.id !== orderToDelete.id)
+            );
+            
+            // Close modal
+            setShowDeleteConfirm(false);
+            setOrderToDelete(null);
+            
+            alert('Order deleted successfully!');
+        } catch (error) {
+            console.error('Error deleting order:', error);
+            alert('Failed to delete order. Please try again.');
+        }
+    };
+
     const handleSort = (field: string) => {
         if (sortBy === field) {
             setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -296,13 +1111,15 @@ const Orders = () => {
                         Manage your orders and track their status
                     </p>
                 </div>
-                <button
-                    onClick={fetchOrders}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2"
-                >
-                    <RefreshCw className="h-4 w-4" />
-                    <span>Refresh</span>
-                </button>
+                <div className="flex items-center space-x-3">
+                    <button
+                        onClick={fetchOrders}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+                    >
+                        <RefreshCw className="h-4 w-4" />
+                        <span>Refresh</span>
+                    </button>
+                </div>
             </div>
 
             {/* Filters and Search */}
@@ -476,29 +1293,20 @@ const Orders = () => {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div className="flex items-center space-x-2">
-                                                <button
-                                                    onClick={() => handleViewOrder(order)}
-                                                    className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
-                                                    title="View Details"
-                                                >
-                                                    <Eye className="h-4 w-4" />
-                                                </button>
+                                                <ViewButton 
+                                                    onClick={() => handleViewOrderModal(order)}
+                                                    size="md"
+                                                />
                                                 {(order.status === 'DRAFT' || order.status === 'PENDING') && (
                                                     <>
-                                                        <button
-                                                            onClick={() => handleViewOrder(order)}
-                                                            className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50"
-                                                            title="Edit Order"
-                                                        >
-                                                            <Edit className="h-4 w-4" />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleCancelOrder(order.id)}
-                                                            className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
-                                                            title="Cancel Order"
-                                                        >
-                                                            <Trash2 className="h-4 w-4" />
-                                                        </button>
+                                                        <EditButton 
+                                                            onClick={() => handleEditOrderModal(order)}
+                                                            size="md"
+                                                        />
+                                                        <DeleteButton 
+                                                            onClick={() => handleDeleteOrderModal(order)}
+                                                            size="md"
+                                                        />
                                                     </>
                                                 )}
                                             </div>
@@ -589,6 +1397,44 @@ const Orders = () => {
                     }}
                     onUpdate={handleUpdateOrder}
                     onCancel={handleCancelOrder}
+                />
+            )}
+
+            {/* View Order Modal */}
+            {selectedOrder && showViewModal && (
+                <ViewOrderModal
+                    order={selectedOrder}
+                    isOpen={showViewModal}
+                    onClose={() => {
+                        setShowViewModal(false);
+                        setSelectedOrder(null);
+                    }}
+                />
+            )}
+
+            {/* Edit Order Modal */}
+            {selectedOrder && showEditModal && (
+                <EditOrderModal
+                    order={selectedOrder}
+                    isOpen={showEditModal}
+                    onClose={() => {
+                        setShowEditModal(false);
+                        setSelectedOrder(null);
+                    }}
+                    onUpdate={handleUpdateOrder}
+                />
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {orderToDelete && showDeleteConfirm && (
+                <DeleteConfirmModal
+                    order={orderToDelete}
+                    isOpen={showDeleteConfirm}
+                    onClose={() => {
+                        setShowDeleteConfirm(false);
+                        setOrderToDelete(null);
+                    }}
+                    onConfirm={handleConfirmDelete}
                 />
             )}
         </div>
