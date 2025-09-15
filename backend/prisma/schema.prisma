@@ -68,6 +68,7 @@ model Order {
   orderNumber   String      @unique @default(uuid()) // Human-readable order number
   distributorId Int?
   //for sample orders and checking functionality
+  paymentStatus String  @default("unpaid")
   specialOrder Boolean @default(false)
   status        OrderStatus @default(PENDING)
 
@@ -95,12 +96,27 @@ model Order {
   distributor  distributor?    @relation(fields: [distributorId], references: [id])
   orderItems   OrderItem[]
   orderHistory OrderHistory[]
-
+  paymentStatusRequest paymentStatusRequest[]
   @@index([distributorId, status])
   @@index([orderNumber])
   @@index([createdAt])
   @@index([status])
   @@map("orders")
+}
+model paymentStatusRequest {
+  id          Int      @id @default(autoincrement())
+  orderId     String   @unique
+  PaymentMode String
+  TxnId       String?   @unique
+  ConfirmationSlip String?  // Optional field for confirmation slip URL or reference
+  requestedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  paymentRequestAt DateTime? @default(now())
+  paymentUpdatedAt DateTime? @updatedAt
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@map("payment_status_requests")
 }
 
 model OrderItem {
@@ -223,4 +239,11 @@ enum OrderStatus {
   SHIPPED
   DELIVERED
   CANCELLED
+}
+enum PaymentMode {
+  CHEQUE_ON_DELIVERY
+  CASH_ON_DELIVERY
+  WALLET
+  ONLINE_BANKING
+  CARD
 }

@@ -16,6 +16,18 @@ const getOrdersController = async (req: Request, res: Response): Promise<Respons
                         phone: true,
                         address: true
                     }
+                },
+                paymentStatusRequest: {
+                    select: {
+                        id: true,
+                        PaymentMode: true,
+                        TxnId: true,
+                        ConfirmationSlip: true,
+                        requestedAt: true,
+                        updatedAt: true,
+                        paymentRequestAt: true,
+                        paymentUpdatedAt: true
+                    }
                 }
             }
         })
@@ -36,6 +48,18 @@ const getOrdersController = async (req: Request, res: Response): Promise<Respons
                                 email: true,
                                 phone: true,
                                 address: true
+                            }
+                        },
+                        paymentStatusRequest: {
+                            select: {
+                                id: true,
+                                PaymentMode: true,
+                                TxnId: true,
+                                ConfirmationSlip: true,
+                                requestedAt: true,
+                                updatedAt: true,
+                                paymentRequestAt: true,
+                                paymentUpdatedAt: true
                             }
                         }
                     }

@@ -9,6 +9,9 @@ const placeOrderController = async (req: Request, res: Response): Promise<Respon
             distributorId,
             items,
             notes,
+            PaymentMode,
+            TxnId,
+            ConfirmationSlip,
             requestedDeliveryDate
         } = req.body;
 
@@ -93,7 +96,12 @@ const placeOrderController = async (req: Request, res: Response): Promise<Respon
                 }
             }
         });
-
+        await prisma.paymentStatusRequest.create({
+            data: {
+                orderId: order.id,
+                PaymentMode: "CASH_ON_DELIVERY"
+            }
+        });
         // Log activity
         await logActivity({
             distributorId: parseInt(distributorId.toString()),

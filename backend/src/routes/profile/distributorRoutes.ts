@@ -4,6 +4,7 @@ import distributorDashboardController from "../../controllers/distributor/dashbo
 import placeOrderController from "../../controllers/distributor/placeOrder";
 import getOrdersController from "../../controllers/distributor/getOrders";
 import updateOrderController from "../../controllers/distributor/updateOrder";
+import paymentRequestController from "../../controllers/admin/payments/paymentRequestController";
 const distributorRouter = express.Router();
 
 distributorRouter.use(checkAccessTokenMiddleware);
@@ -12,5 +13,6 @@ distributorRouter.get("/dashboard", distributorDashboardController);
 distributorRouter.get("/get-orders",getOrdersController)
 distributorRouter.post("/place-order", placeOrderController);
 distributorRouter.put("/update-order/:id", updateOrderController);
+distributorRouter.post("/payment-status", paymentRequestController);
 
 export default distributorRouter;

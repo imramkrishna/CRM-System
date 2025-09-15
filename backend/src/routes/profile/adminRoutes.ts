@@ -11,6 +11,8 @@ import checkAdminMiddleware from "../../middlewares/token/checkAdmin";
 import updateDistributorController from "../../controllers/admin/updateDistributorController";
 import deleteProductController from "../../controllers/admin/deleteProductController";
 import manualOrderRequestController from "../../controllers/admin/manualOrderRequest";
+import paymentRequestController from "../../controllers/admin/payments/paymentStatusController";
+import paymentStatusController from "../../controllers/admin/payments/paymentStatusController";
 const adminRouter = express.Router();
 adminRouter.use(checkAccessTokenMiddleware);
 // Admin dashboard route
@@ -24,5 +26,7 @@ adminRouter.put("/updateProduct/:id", checkAdminMiddleware, updateProductsContro
 adminRouter.put("/updatedistributor/:id", checkAdminMiddleware, updateDistributorController);
 adminRouter.delete("/deleteProduct/:id", checkAdminMiddleware,deleteProductController);
 adminRouter.post("/manual-order-request", manualOrderRequestController);
+adminRouter.post("/payment-requests", paymentRequestController);
+adminRouter.post("/update-payment-status", paymentStatusController);
 
 export default adminRouter;

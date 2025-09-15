@@ -54,8 +54,27 @@ interface OrderItem {
             email: string;
             phone: string;
             address: string;
-        }
+        };
+        paymentStatusRequest?: {
+            id: number;
+            PaymentMode: string;
+            TxnId?: string;
+            ConfirmationSlip?: string;
+            requestedAt: string;
+            updatedAt: string;
+            paymentRequestAt?: string;
+            paymentUpdatedAt?: string;
+        };
     }
+}
+
+interface PaymentStatus {
+    mode: string;
+    status: string;
+    txnId?: string | null;
+    confirmationSlip?: string | null;
+    requestedAt: string;
+    updatedAt: string;
 }
 
 interface GroupedOrder {
@@ -67,6 +86,7 @@ interface GroupedOrder {
     status: string;
     createdAt: string;
     isFulfilled: boolean;
+    paymentStatus: PaymentStatus;
     distributor: {
         id: number;
         ownerName: string;
@@ -176,6 +196,29 @@ const Orders = () => {
             const isFulfilled = items.every(item => item.quantityFulfilled === item.quantity);
             const status = isFulfilled ? 'DELIVERED' : 'PENDING';
             const distributor = items[0].order.distributor; // Get distributor from first item
+            const paymentStatusRequest = items[0].order.paymentStatusRequest; // Get payment status from first item
+
+            // Determine payment status
+            let paymentStatus: PaymentStatus;
+            if (paymentStatusRequest) {
+                paymentStatus = {
+                    mode: paymentStatusRequest.PaymentMode,
+                    status: paymentStatusRequest.TxnId ? 'Paid' : 'Pending',
+                    txnId: paymentStatusRequest.TxnId,
+                    confirmationSlip: paymentStatusRequest.ConfirmationSlip,
+                    requestedAt: paymentStatusRequest.requestedAt,
+                    updatedAt: paymentStatusRequest.updatedAt
+                };
+            } else {
+                paymentStatus = {
+                    mode: 'CASH_ON_DELIVERY',
+                    status: 'Pending',
+                    txnId: null,
+                    confirmationSlip: null,
+                    requestedAt: items[0].createdAt,
+                    updatedAt: items[0].createdAt
+                };
+            }
 
             return {
                 orderId,
@@ -186,7 +229,8 @@ const Orders = () => {
                 status,
                 createdAt: items[0].createdAt,
                 isFulfilled,
-                distributor
+                distributor,
+                paymentStatus
             };
         }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     };
@@ -604,10 +648,24 @@ const Orders = () => {
                                         </div>
                                         <div>
                                             <p className="text-green-600 text-sm font-medium">Payment Status</p>
-                                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                Paid
+                                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                                selectedOrder.paymentStatus.status === 'Paid' 
+                                                    ? 'bg-green-100 text-green-800' 
+                                                    : 'bg-yellow-100 text-yellow-800'
+                                            }`}>
+                                                {selectedOrder.paymentStatus.status}
                                             </span>
                                         </div>
+                                        <div>
+                                            <p className="text-green-600 text-sm font-medium">Payment Mode</p>
+                                            <p className="text-green-900 font-semibold">{selectedOrder.paymentStatus.mode.replace(/_/g, ' ')}</p>
+                                        </div>
+                                        {selectedOrder.paymentStatus.txnId && (
+                                            <div>
+                                                <p className="text-green-600 text-sm font-medium">Transaction ID</p>
+                                                <p className="text-green-900 font-semibold">{selectedOrder.paymentStatus.txnId}</p>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 

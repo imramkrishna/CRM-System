@@ -68,6 +68,20 @@ interface OrderForm {
     requestedDeliveryDate: string;
 }
 
+enum PaymentMode {
+    CHEQUE_ON_DELIVERY = 'CHEQUE_ON_DELIVERY',
+    CASH_ON_DELIVERY = 'CASH_ON_DELIVERY',
+    WALLET = 'WALLET',
+    ONLINE_BANKING = 'ONLINE_BANKING',
+    CARD = 'CARD'
+}
+
+interface PaymentInfo {
+    paymentMode: PaymentMode;
+    txnId?: string;
+    confirmationSlip?: string;
+}
+
 const Products = () => {
     const router = useRouter();
     const user = useSelector((state: RootState) => state.auth.user);
@@ -89,6 +103,11 @@ const Products = () => {
     });
     const [orderQuantity, setOrderQuantity] = useState(1);
     const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
+    const [paymentInfo, setPaymentInfo] = useState<PaymentInfo>({
+        paymentMode: PaymentMode.CASH_ON_DELIVERY,
+        txnId: '',
+        confirmationSlip: ''
+    });
     const [showProductDetails, setShowProductDetails] = useState(false);
 
     // Fetch products on component mount
@@ -121,9 +140,15 @@ const Products = () => {
         try {
             const response = await get("/admin/getProducts", {
                 withCredentials: true
-            });// Debug log
-            setProducts(response.data.data.products)
-            setFilteredProducts(response.data.data.products || []);
+            });
+            
+            // Debug log to see the actual response structure
+            console.log("API Response:", response.data);
+            
+            // Handle the correct response structure
+            const productsData = response.data.products || [];
+            setProducts(productsData);
+            setFilteredProducts(productsData);
         } catch (error) {
             console.error("Error fetching products:", error);
             setProducts([]);
@@ -178,6 +203,11 @@ const Products = () => {
             notes: '',
             requestedDeliveryDate: ''
         });
+        setPaymentInfo({
+            paymentMode: PaymentMode.CASH_ON_DELIVERY,
+            txnId: '',
+            confirmationSlip: ''
+        });
         setShowOrderModal(true);
     };
 
@@ -185,8 +215,44 @@ const Products = () => {
         return quantity * unitPrice;
     };
 
+    const validatePaymentInfo = () => {
+        if (paymentInfo.paymentMode === PaymentMode.CASH_ON_DELIVERY) {
+            return true;
+        }
+        
+        if (paymentInfo.paymentMode === PaymentMode.CHEQUE_ON_DELIVERY) {
+            return !!paymentInfo.confirmationSlip;
+        }
+        
+        // For WALLET, ONLINE_BANKING, CARD - require TxnId
+        if ([PaymentMode.WALLET, PaymentMode.ONLINE_BANKING, PaymentMode.CARD].includes(paymentInfo.paymentMode)) {
+            return !!paymentInfo.txnId;
+        }
+        
+        return true;
+    };
+
+    const getValidationMessage = () => {
+        if (paymentInfo.paymentMode === PaymentMode.CHEQUE_ON_DELIVERY && !paymentInfo.confirmationSlip) {
+            return "Confirmation slip is required for Cheque on Delivery";
+        }
+        
+        if ([PaymentMode.WALLET, PaymentMode.ONLINE_BANKING, PaymentMode.CARD].includes(paymentInfo.paymentMode) && !paymentInfo.txnId) {
+            return "Transaction ID is required for digital payments";
+        }
+        
+        return "";
+    };
+
     const submitOrder = async () => {
         if (!selectedProduct || !user) return;
+
+        // Validate payment information
+        if (!validatePaymentInfo()) {
+            const message = getValidationMessage();
+            alert(message || "Please fill in all required payment information.");
+            return;
+        }
 
         setIsSubmittingOrder(true);
         try {
@@ -208,7 +274,35 @@ const Products = () => {
                 requestedDeliveryDate: orderForm.requestedDeliveryDate || null
             };
 
-            await post("/distributor/place-order", orderData, {
+            // First, place the order
+            const orderResponse = await post("/distributor/place-order", orderData, {
+                withCredentials: true
+            });
+
+            // Get the order ID from the response
+            const orderId = orderResponse.data.order?.id;
+            
+            if (!orderId) {
+                throw new Error("Order ID not found in response");
+            }
+
+            // Then, create the payment request
+            const paymentData: any = {
+                orderId: orderId,
+                PaymentMode: paymentInfo.paymentMode
+            };
+
+            // Add TxnId and ConfirmationSlip if not CASH_ON_DELIVERY
+            if (paymentInfo.paymentMode !== PaymentMode.CASH_ON_DELIVERY) {
+                if (paymentInfo.txnId) {
+                    paymentData.TxnId = paymentInfo.txnId;
+                }
+                if (paymentInfo.confirmationSlip) {
+                    paymentData.ConfirmationSlip = paymentInfo.confirmationSlip;
+                }
+            }
+
+            await post("/distributor/payment-status", paymentData, {
                 withCredentials: true
             });
 
@@ -239,6 +333,8 @@ const Products = () => {
 
     // Debug log before render
     console.log("Component render - Products:", products?.length || 0, "Filtered:", filteredProducts?.length || 0);
+    console.log("Current products state:", products);
+    console.log("Current filteredProducts state:", filteredProducts);
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -455,7 +551,7 @@ const Products = () => {
 
             {/* Order Modal */}
             {showOrderModal && selectedProduct && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-[9999] overflow-y-auto">
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[9999] overflow-y-auto">
                     <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-200 my-8">
                         <div className="p-6">
                             {/* Modal Header */}
@@ -566,6 +662,84 @@ const Products = () => {
                                     </div>
                                 </div>
 
+                                {/* Payment Information */}
+                                <div className="bg-gray-50 rounded-lg p-4">
+                                    <h4 className="font-semibold text-gray-900 mb-4">Payment Information</h4>
+                                    
+                                    {/* Payment Mode */}
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Payment Mode *
+                                        </label>
+                                        <select
+                                            value={paymentInfo.paymentMode}
+                                            onChange={(e) => setPaymentInfo(prev => ({ 
+                                                ...prev, 
+                                                paymentMode: e.target.value as PaymentMode,
+                                                txnId: '',
+                                                confirmationSlip: ''
+                                            }))}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            required
+                                        >
+                                            <option value={PaymentMode.CASH_ON_DELIVERY}>Cash on Delivery</option>
+                                            <option value={PaymentMode.CHEQUE_ON_DELIVERY}>Cheque on Delivery</option>
+                                            <option value={PaymentMode.WALLET}>Wallet</option>
+                                            <option value={PaymentMode.ONLINE_BANKING}>Online Banking</option>
+                                            <option value={PaymentMode.CARD}>Card</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Transaction ID - Show for all modes except CASH_ON_DELIVERY */}
+                                    {paymentInfo.paymentMode !== PaymentMode.CASH_ON_DELIVERY && (
+                                        <div className="mb-4">
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Transaction ID {paymentInfo.paymentMode === PaymentMode.CHEQUE_ON_DELIVERY ? '(Optional)' : '*'}
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={paymentInfo.txnId}
+                                                onChange={(e) => setPaymentInfo(prev => ({ ...prev, txnId: e.target.value }))}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                placeholder="Enter transaction ID"
+                                                required={paymentInfo.paymentMode !== PaymentMode.CHEQUE_ON_DELIVERY}
+                                            />
+                                        </div>
+                                    )}
+
+                                    {/* Confirmation Slip - Show for all modes except CASH_ON_DELIVERY */}
+                                    {paymentInfo.paymentMode !== PaymentMode.CASH_ON_DELIVERY && (
+                                        <div className="mb-4">
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                Confirmation Slip {paymentInfo.paymentMode === PaymentMode.CHEQUE_ON_DELIVERY ? '*' : '(Optional)'}
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={paymentInfo.confirmationSlip}
+                                                onChange={(e) => setPaymentInfo(prev => ({ ...prev, confirmationSlip: e.target.value }))}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                placeholder="Enter confirmation slip details"
+                                                required={paymentInfo.paymentMode === PaymentMode.CHEQUE_ON_DELIVERY}
+                                            />
+                                        </div>
+                                    )}
+
+                                    {/* Payment Mode Info */}
+                                    <div className="text-xs text-gray-600 bg-blue-50 p-2 rounded">
+                                        {paymentInfo.paymentMode === PaymentMode.CASH_ON_DELIVERY && 
+                                            "Payment will be collected upon delivery."
+                                        }
+                                        {paymentInfo.paymentMode === PaymentMode.CHEQUE_ON_DELIVERY && 
+                                            "Cheque will be collected upon delivery. Confirmation slip is required."
+                                        }
+                                        {(paymentInfo.paymentMode === PaymentMode.WALLET || 
+                                          paymentInfo.paymentMode === PaymentMode.ONLINE_BANKING || 
+                                          paymentInfo.paymentMode === PaymentMode.CARD) && 
+                                            "Transaction ID is required for digital payments."
+                                        }
+                                    </div>
+                                </div>
+
                                 {/* Order Summary */}
                                 <div className="bg-blue-50 rounded-lg p-4">
                                     <h4 className="font-semibold text-gray-900 mb-3">Order Summary</h4>
@@ -594,30 +768,38 @@ const Products = () => {
                                 </div>
 
                                 {/* Action Buttons */}
-                                <div className="flex space-x-3 pt-4">
-                                    <button
-                                        onClick={() => setShowOrderModal(false)}
-                                        className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        onClick={submitOrder}
-                                        disabled={isSubmittingOrder}
-                                        className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-                                    >
-                                        {isSubmittingOrder ? (
-                                            <>
-                                                <Loader2 className="h-4 w-4 animate-spin" />
-                                                <span>Placing Order...</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <ShoppingCart className="h-4 w-4" />
-                                                <span>Place Order</span>
-                                            </>
-                                        )}
-                                    </button>
+                                <div className="flex flex-col space-y-3 pt-4">
+                                    {!validatePaymentInfo() && (
+                                        <div className="text-sm text-red-600 bg-red-50 p-2 rounded border border-red-200">
+                                            {getValidationMessage()}
+                                        </div>
+                                    )}
+                                    
+                                    <div className="flex space-x-3">
+                                        <button
+                                            onClick={() => setShowOrderModal(false)}
+                                            className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={submitOrder}
+                                            disabled={isSubmittingOrder || !validatePaymentInfo()}
+                                            className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                                        >
+                                            {isSubmittingOrder ? (
+                                                <>
+                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                    <span>Placing Order...</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <ShoppingCart className="h-4 w-4" />
+                                                    <span>Place Order</span>
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
