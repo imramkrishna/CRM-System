@@ -8,7 +8,7 @@ const registerController = async (req: Request, res: Response) => {
 
     try {
         // Validate input
-        if (!ownerName || !email || !phone || !companyName || !message || !address || !password) {
+        if (!ownerName || !email || !phone || !companyName || !address || !password) {
             return res.status(StatusCode.BAD_REQUEST).json({ message: 'All fields are required' });
         }
 

@@ -10,6 +10,7 @@ import updateProductsController from "../../controllers/products/updateProducts"
 import checkAdminMiddleware from "../../middlewares/token/checkAdmin";
 import updateDistributorController from "../../controllers/admin/updateDistributorController";
 import deleteProductController from "../../controllers/admin/deleteProductController";
+import manualOrderRequestController from "../../controllers/admin/manualOrderRequest";
 const adminRouter = express.Router();
 adminRouter.use(checkAccessTokenMiddleware);
 // Admin dashboard route
@@ -22,5 +23,6 @@ adminRouter.get("/getProducts", getProductsController);
 adminRouter.put("/updateProduct/:id", checkAdminMiddleware, updateProductsController);
 adminRouter.put("/updatedistributor/:id", checkAdminMiddleware, updateDistributorController);
 adminRouter.delete("/deleteProduct/:id", checkAdminMiddleware,deleteProductController);
+adminRouter.post("/manual-order-request", manualOrderRequestController);
 
 export default adminRouter;
