@@ -3,6 +3,7 @@ import prisma from "../../utils/prismaClient";
 import comparePassword from "../../utils/comparePassword";
 import { StatusCode } from "../../types";
 import { generateAccessToken, generateRefreshToken } from "../../utils/generateToken";
+import { logActivity } from "../../utils/activityLogger";
 
 const adminLoginController = async (req: Request, res: Response): Promise<Response> => {
     const { email, password } = req.body;
@@ -56,6 +57,21 @@ const adminLoginController = async (req: Request, res: Response): Promise<Respon
             maxAge: 40 * 1000, // 40 seconds
             domain: undefined // Let browser handle domain
         });
+
+        // Log activity for admin login
+        try {
+            await logActivity({
+                action: "Admin Login",
+                details: {
+                    adminId: adminUser.id,
+                    email: adminUser.email,
+                    loginTime: new Date()
+                }
+            });
+        } catch (activityError) {
+            console.error("Failed to log activity:", activityError);
+        }
+
         return res.status(StatusCode.SUCCESS).json({
             message: 'Login successful',
             user: {

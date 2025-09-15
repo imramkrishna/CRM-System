@@ -2,6 +2,7 @@ import {Response,Request} from "express";
 import { StatusCode } from "../../types";
 import prisma from "../../utils/prismaClient";
 import { generateAccessToken } from "../../utils/generateToken";
+import { logActivity } from "../../utils/activityLogger";
 
 const tokenController= async (req: Request, res: Response) => {
     try {
@@ -22,6 +23,21 @@ const tokenController= async (req: Request, res: Response) => {
             sameSite: 'strict', // Adjust as necessary for your application
             maxAge: 10 * 1000 // 10 seconds
         });
+
+        // Log activity for token refresh
+        try {
+            await logActivity({
+                action: "Access Token Refreshed",
+                details: {
+                    distributorId: (req as any).user?.id || null,
+                    userType: (req as any).user?.role || "distributor",
+                    timestamp: new Date()
+                },
+                distributorId: (req as any).user?.id || null
+            });
+        } catch (activityError) {
+            console.error("Failed to log activity:", activityError);
+        }
 
         return res.status(StatusCode.SUCCESS).json({ message: "Access token generated successfully" });
     } catch (error) {

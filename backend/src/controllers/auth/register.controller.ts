@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import prisma from '../../utils/prismaClient';
 import { StatusCode } from '../../types';
 import bcrypt from "bcrypt";
+import { logActivity } from "../../utils/activityLogger";
 
 const registerController = async (req: Request, res: Response) => {
     const { ownerName, email, phone, companyName, message, address, password } = req.body;
@@ -40,6 +41,16 @@ const registerController = async (req: Request, res: Response) => {
                 address,
                 message,
                 password: hashedPassword
+            }
+        });
+
+        // Log activity
+        await logActivity({
+            action: "User Registration",
+            details: {
+                email: newUser.email,
+                companyName: newUser.companyName,
+                registrationId: newUser.id
             }
         });
 

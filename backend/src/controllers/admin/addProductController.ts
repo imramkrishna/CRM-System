@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import prisma from "../../utils/prismaClient";
 import { StatusCode, ProductCreateRequest } from "../../types";
 import { generateBarcode } from "../../utils/productUtils";
+import { logActivity } from "../../utils/activityLogger";
 
 const addProductController = async (req: Request, res: Response): Promise<Response | void> => {
     try {
@@ -102,6 +103,16 @@ const addProductController = async (req: Request, res: Response): Promise<Respon
                 isDiscontinued: isDiscontinued !== undefined ? Boolean(isDiscontinued) : false,
                 dateOfManufacture: dateOfManufacture ? new Date(dateOfManufacture) : undefined,
                 dateOfExpiry: dateOfExpiry ? new Date(dateOfExpiry) : undefined
+            }
+        });
+
+        // Log activity
+        await logActivity({
+            action: "Created Product",
+            details: {
+                productId: product.id,
+                sku: product.sku,
+                name: product.name
             }
         });
 

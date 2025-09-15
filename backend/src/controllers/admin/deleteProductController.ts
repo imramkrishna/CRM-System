@@ -1,6 +1,7 @@
 import { Request,Response } from "express";
 import prisma from "../../utils/prismaClient";
 import { StatusCode } from "../../types";
+import { logActivity } from "../../utils/activityLogger";
 
 const deleteProductController = async (req: Request, res: Response): Promise<Response | void> => {
     try {
@@ -21,6 +22,16 @@ const deleteProductController = async (req: Request, res: Response): Promise<Res
         // Delete the product
         await prisma.product.delete({
             where: { id: Number(id) }
+        });
+
+        // Log activity
+        await logActivity({
+            action: "Deleted Product",
+            details: {
+                productId: existingProduct.id,
+                sku: existingProduct.sku,
+                name: existingProduct.name
+            }
         });
 
         return res.status(StatusCode.SUCCESS).json({ message: "Product deleted successfully" });

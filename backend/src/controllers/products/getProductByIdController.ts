@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import prisma from '../../utils/prismaClient';
+import { logActivity } from '../../utils/activityLogger';
 
 export const getProductById = async (req: Request, res: Response) => {
     try {
@@ -31,6 +32,20 @@ export const getProductById = async (req: Request, res: Response) => {
                 success: false,
                 error: "Product not found"
             });
+        }
+
+        // Log activity for product retrieval
+        try {
+            await logActivity({
+                action: "Product Retrieved",
+                details: {
+                    productId: product.id,
+                    sku: product.sku,
+                    name: product.name
+                }
+            });
+        } catch (activityError) {
+            console.error("Failed to log activity:", activityError);
         }
 
         return res.status(200).json({

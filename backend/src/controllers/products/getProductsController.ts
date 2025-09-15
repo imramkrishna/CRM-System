@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import prisma from "../../utils/prismaClient";
 import { StatusCode } from "../../types";
+import { logActivity } from "../../utils/activityLogger";
 
-const getProductsController = async (req: Request, res: Response): Promise<Response | void> => {
+export const getProductsController = async (req: any, res: any) => {
     try {
         const {
             search,
@@ -75,11 +76,23 @@ const getProductsController = async (req: Request, res: Response): Promise<Respo
             }
         });
 
+        // Log activity for products retrieval
+        try {
+            await logActivity({
+                action: "Products Retrieved",
+                details: {
+                    searchQuery: search || null,
+                    category: category || null,
+                    brand: brand || null,
+                    totalResults: products.length
+                }
+            });
+        } catch (activityError) {
+            console.error("Failed to log activity:", activityError);
+        }
+
         return res.status(StatusCode.SUCCESS).json({
-            message: "Products fetched successfully",
-            data: {
-                products
-            }
+            products: products
         });
 
     } catch (error: any) {

@@ -2,6 +2,8 @@ import { Request, Response } from "express"
 import prisma from "../../utils/prismaClient"
 import { StatusCode } from "../../types"
 import { distributor, pendingRegistration } from "@prisma/client"
+import { logActivity } from "../../utils/activityLogger"
+
 const verifyPendingRegistrationController = async (req: Request, res: Response): Promise<Response> => {
     console.log('Verifying distributor:', req.body);
     const { email } = req.body;
@@ -38,6 +40,22 @@ const verifyPendingRegistrationController = async (req: Request, res: Response):
         await prisma.pendingRegistration.delete({
             where: { email }
         });
+
+        // Log activity for distributor verification
+        try {
+            await logActivity({
+                action: "Distributor Verified",
+                details: {
+                    distributorId: newDistributor.id,
+                    email: newDistributor.email,
+                    companyName: newDistributor.companyName,
+                    verifiedBy: (req as any).adminId || "admin"
+                },
+                distributorId: newDistributor.id
+            });
+        } catch (activityError) {
+            console.error("Failed to log activity:", activityError);
+        }
 
         // If distributor exists, return their information
         return res.status(StatusCode.SUCCESS).json({ message: 'Distributor verified successfully', distributor: newDistributor });

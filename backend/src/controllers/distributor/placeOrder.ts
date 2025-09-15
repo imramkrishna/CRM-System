@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import prisma from "../../utils/prismaClient";
 import { StatusCode } from "../../types";
+import { logActivity } from "../../utils/activityLogger";
 
 const placeOrderController = async (req: Request, res: Response): Promise<Response | void> => {
     try {
@@ -90,6 +91,18 @@ const placeOrderController = async (req: Request, res: Response): Promise<Respon
                         email: true
                     }
                 }
+            }
+        });
+
+        // Log activity
+        await logActivity({
+            distributorId: parseInt(distributorId.toString()),
+            action: "Order Placed",
+            details: {
+                orderId: order.id,
+                orderNumber: order.orderNumber,
+                totalAmount: order.totalAmount,
+                itemCount: order.orderItems.length
             }
         });
 

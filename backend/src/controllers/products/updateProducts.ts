@@ -1,6 +1,7 @@
 import { Request,Response } from "express";
 import prisma from "../../utils/prismaClient";
 import { StatusCode } from "../../types";
+import { logActivity } from "../../utils/activityLogger";
 
 const updateProductsController = async (req: Request, res: Response): Promise<Response | void> => {
     try {
@@ -50,6 +51,17 @@ const updateProductsController = async (req: Request, res: Response): Promise<Re
                 costPrice: costPrice !== undefined ? parseFloat(costPrice.toString()) : existingProduct.costPrice,
                 stockQuantity: parseInt(stockQuantity.toString()),
                 isActive: isActive !== undefined ? isActive : existingProduct.isActive
+            }
+        });
+
+        // Log activity
+        await logActivity({
+            action: "Product Updated",
+            details: {
+                productId: updatedProduct.id,
+                sku: updatedProduct.sku,
+                name: updatedProduct.name,
+                changes: req.body
             }
         });
 

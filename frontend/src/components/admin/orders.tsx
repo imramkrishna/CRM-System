@@ -4,7 +4,6 @@ import {
     DollarSign,
     Plus,
     Filter,
-    Download,
     Eye,
     Edit,
     Check,

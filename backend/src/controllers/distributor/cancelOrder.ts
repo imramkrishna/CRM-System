@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import prisma from "../../utils/prismaClient";
 import { StatusCode } from "../../types";
+import { logActivity } from "../../utils/activityLogger";
 
 const cancelOrderController = async (req: Request, res: Response): Promise<Response | void> => {
     const id = req.params.id;
@@ -49,6 +50,17 @@ const cancelOrderController = async (req: Request, res: Response): Promise<Respo
                     notes: "Order cancelled via API"
                 }
             });
+        });
+
+        // Log activity
+        await logActivity({
+            distributorId: order.distributorId,
+            action: "Order Cancelled",
+            details: {
+                orderId: order.id,
+                orderNumber: order.orderNumber,
+                fromStatus: order.status
+            }
         });
 
         return res.status(StatusCode.SUCCESS).json({

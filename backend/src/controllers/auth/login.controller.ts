@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import { StatusCode } from '../../types';
 import bcrypt from "bcrypt"
 import { generateAccessToken, generateRefreshToken } from "../../utils/generateToken";
+import { logActivity } from "../../utils/activityLogger";
 
 const prisma = new PrismaClient();
 
@@ -55,6 +56,17 @@ const loginController = async (req: Request, res: Response): Promise<Response> =
             maxAge: 40 * 1000, // 40 seconds
             domain: undefined // Let browser handle domain
         });
+
+        // Log activity
+        await logActivity({
+            distributorId: user.id,
+            action: "User Login",
+            details: {
+                email: user.email,
+                loginTime: new Date()
+            }
+        });
+
         return res.status(StatusCode.SUCCESS).json({
             message: 'Login successful', user: {
                 id: user.id,

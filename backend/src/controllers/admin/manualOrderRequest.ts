@@ -1,6 +1,7 @@
 import { Response,Request } from "express";
 import { StatusCode } from "../../types";
 import prisma from "../../utils/prismaClient";
+import { logActivity } from "../../utils/activityLogger";
 const manualOrderRequestController=async(req:Request,res:Response):Promise<Response | void>=>{
     try {
         const {distributorId,
@@ -86,6 +87,18 @@ const manualOrderRequestController=async(req:Request,res:Response):Promise<Respo
                         email: true
                     }
                 }
+            }
+        });
+
+        // Log activity
+        await logActivity({
+            distributorId: parseInt(distributorId?.toString()),
+            action: "Manual Order Created",
+            details: {
+                orderId: order.id,
+                orderNumber: order.orderNumber,
+                totalAmount: order.totalAmount,
+                itemCount: order.orderItems.length
             }
         });
 
