@@ -78,7 +78,7 @@ const LoginForm = ({ type, title, subtitle }: LoginFormProps) => {
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
                 <div className="text-center">
                     <Link href="/" className="text-3xl font-bold text-blue-600">
-                        Harmony Surgitech
+                        Med CRM
                     </Link>
                 </div>
                 <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">

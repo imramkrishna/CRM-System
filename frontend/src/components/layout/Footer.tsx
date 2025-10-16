@@ -6,7 +6,7 @@ export default function Footer() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                     <div className="col-span-1 md:col-span-2">
-                        <h3 className="text-xl font-bold mb-4">Harmony Surgitech</h3>
+                        <h3 className="text-xl font-bold mb-4">Med CRM</h3>
                         <p className="text-gray-300 mb-4">
                             Leading provider of precision surgical instruments and medical equipment,
                             committed to advancing healthcare through innovative solutions.
@@ -82,7 +82,7 @@ export default function Footer() {
 
                 <div className="mt-8 pt-8 border-t border-gray-700 flex flex-col md:flex-row justify-between items-center">
                     <p className="text-gray-400 text-sm mb-4 md:mb-0">
-                        © 2025 Harmony Surgitech. All rights reserved.
+                        © 2025 Med CRM. All rights reserved.
                     </p>
                     <div className="flex space-x-6 text-sm text-gray-400">
                         <Link href="#" className="hover:text-blue-400 transition-colors">

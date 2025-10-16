@@ -12,7 +12,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Harmony Surgitech - Advanced Surgical Solutions",
+  title: "Med CRM - Advanced Surgical Solutions",
   description: "Leading provider of high-quality surgical instruments and medical equipment for healthcare professionals worldwide.",
 };
 

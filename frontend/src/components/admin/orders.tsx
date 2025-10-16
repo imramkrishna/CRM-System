@@ -332,7 +332,7 @@ const Orders = () => {
         // Header
         doc.setFontSize(20);
         doc.setTextColor(88, 28, 135); // Purple color
-        doc.text('Harmony SurgiTech', 20, 20);
+        doc.text('Med CRM', 20, 20);
         
         doc.setFontSize(16);
         doc.setTextColor(0, 0, 0);
@@ -382,7 +382,7 @@ const Orders = () => {
         doc.setFontSize(10);
         doc.setTextColor(128, 128, 128);
         doc.text('Thank you for your business!', 20, pageHeight - 20);
-        doc.text('Harmony SurgiTech - Medical Equipment Solutions', 20, pageHeight - 10);
+        doc.text('Med CRM - Medical Equipment Solutions', 20, pageHeight - 10);
         
         // Open in new window
         const pdfBlob = doc.output('blob');

@@ -12,10 +12,9 @@ declare global {
 }
 const checkRefreshTokenMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
     const refreshToken = req.cookies.refreshToken;
-
     if (!refreshToken) {
         return res.status(StatusCode.UNAUTHORIZED).json({ message: "Refresh token is required" });
-    }
+    }1
     const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET as string) as User;
     if (!decoded) {
         return res.status(StatusCode.UNAUTHORIZED).json({ message: "Invalid refresh token", action: "login again" });

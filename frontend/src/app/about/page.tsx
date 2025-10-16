@@ -55,10 +55,10 @@ export default function AboutPage() {
                     {/* Hero Section */}
                     <div className="text-center mb-16">
                         <h1 className="text-4xl font-bold text-gray-900 mb-6">
-                            About Harmony Surgitech
+                            About Med CRM
                         </h1>
                         <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                            For over 25 years, Harmony Surgitech has been at the forefront of surgical innovation,
+                            For over 25 years, Med CRM has been at the forefront of surgical innovation,
                             providing healthcare professionals with the precision instruments they need to deliver
                             exceptional patient care.
                         </p>
@@ -120,7 +120,7 @@ export default function AboutPage() {
                             <h2 className="text-3xl font-bold text-gray-900 mb-6">Our Story</h2>
                             <div className="prose prose-lg max-w-none text-gray-700">
                                 <p className="mb-6">
-                                    Founded in 1999 by a team of surgeons and engineers, Harmony Surgitech was born
+                                    Founded in 1999 by a team of surgeons and engineers, Med CRM was born
                                     from a simple yet powerful vision: to create surgical instruments that would
                                     enhance precision, improve safety, and ultimately save lives.
                                 </p>

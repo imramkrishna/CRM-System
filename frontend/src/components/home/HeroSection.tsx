@@ -13,7 +13,7 @@ const HeroSection = () => {
                             <span className="text-blue-600"> Medical Solutions</span>
                         </h1>
                         <p className="mt-6 text-xl text-gray-600 leading-relaxed">
-                            Harmony Surgitech delivers precision-engineered medical instruments and equipment
+                            Med CRM delivers precision-engineered medical instruments and equipment
                             to healthcare professionals worldwide. Excellence in every tool, precision in every procedure.
                         </p>
 

@@ -57,7 +57,7 @@ export default function BecomeDistributorPage() {
                             Application Submitted!
                         </h1>
                         <p className="text-lg text-gray-600 mb-8">
-                            Thank you for your interest in becoming a Harmony Surgitech distributor.
+                            Thank you for your interest in becoming a Med CRM distributor.
                             We&apos;ve received your application and will review it within 3-5 business days.
                         </p>
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">

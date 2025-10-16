@@ -1,6 +1,6 @@
-# Harmony Surgitech - Medical Equipment Website
+# Med CRM - Medical Equipment Website
 
-A modern, responsive website for Harmony Surgitech, a leading provider of surgical instruments and medical equipment. Built with Next.js, TypeScript, Tailwind CSS, and Redux.
+A modern, responsive website for Med CRM, a leading provider of surgical instruments and medical equipment. Built with Next.js, TypeScript, Tailwind CSS, and Redux.
 
 ## 🚀 Features
 
@@ -92,7 +92,7 @@ The website is fully responsive and tested on:
 - **Professional Typography**: Inter font family
 - **Accessibility**: Proper contrast ratios and keyboard navigation
 
-Built with ❤️ for Harmony Surgitech
+Built with ❤️ for Med CRM
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 

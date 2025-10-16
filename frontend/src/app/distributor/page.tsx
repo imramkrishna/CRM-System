@@ -1081,7 +1081,7 @@ const DistributorDashboard = () => {
                                 <Package className="h-5 w-5" />
                             </div>
                             <div>
-                                <h1 className="font-bold text-base text-white">Harmony Surgitech</h1>
+                                <h1 className="font-bold text-base text-white">Med CRM</h1>
                                 <p className="text-xs text-blue-300">Distributor Portal</p>
                             </div>
                         </div>
