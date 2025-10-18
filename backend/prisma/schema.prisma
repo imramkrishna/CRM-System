@@ -235,10 +235,18 @@ model activityLog {
 }
 // Enhanced enum with more granular statuses
 enum OrderStatus {
+  DRAFT              // Keep temporarily
   PENDING
+  CONFIRMED
+  APPROVED           // Keep temporarily
+  REJECTED           // Keep temporarily
+  PROCESSING
+  READY_TO_SHIP      // Keep temporarily
   SHIPPED
   DELIVERED
   CANCELLED
+  RETURNED           // Keep temporarily
+  PARTIALLY_FULFILLED // Keep temporarily
 }
 enum PaymentMode {
   CHEQUE_ON_DELIVERY

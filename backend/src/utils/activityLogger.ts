@@ -2,7 +2,7 @@ import prisma from "./prismaClient";
 
 interface ActivityLogData {
     distributorId?: number | null;
-    action: string;
+    action: string
     details?: any;
 }
 

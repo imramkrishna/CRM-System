@@ -1185,7 +1185,7 @@ const Inventory = () => {
             const response = await get("/admin/getProducts", {
                 withCredentials: true
             });
-            setProducts(response.data.data.products);
+            setProducts(response.data.products);
             console.log('Fetched products:', response.data.data.products);
         } catch (error) {
             console.error('Error fetching products:', error);
