@@ -32,6 +32,7 @@ import { useAppSelector } from '@/lib/hooks';
 import ViewButton from '@/components/ui/buttons/ViewButton';
 import EditButton from '@/components/ui/buttons/EditButton';
 import DeleteButton from '@/components/ui/buttons/DeleteButton';
+import Loading from '../ui/buttons/Loading';
 
 interface OrderItem {
     id: string;
@@ -1092,12 +1093,7 @@ const Orders = () => {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-64">
-                <div className="flex items-center space-x-2">
-                    <RefreshCw className="h-6 w-6 animate-spin text-blue-600" />
-                    <span className="text-lg text-gray-600">Loading orders...</span>
-                </div>
-            </div>
+            <Loading message="orders" />
         );
     }
 

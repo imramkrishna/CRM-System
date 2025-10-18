@@ -21,6 +21,7 @@ import {
 import { get, post, put } from "@/lib/api";
 import EditButton from "../ui/buttons/EditButton";
 import ViewButton from "../ui/buttons/ViewButton";
+import Loading from "../ui/buttons/Loading";
 
 interface Distributor {
     id: number;
@@ -326,10 +327,7 @@ const Customers = () => {
 
             {/* Loading and Error States */}
             {loading && (
-                <div className="flex justify-center items-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                    <span className="ml-2 text-gray-600">Loading distributors...</span>
-                </div>
+                <Loading message="distributors"/>
             )}
 
             {error && (

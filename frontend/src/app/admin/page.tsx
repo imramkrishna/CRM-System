@@ -68,6 +68,7 @@ import VerifyDistributor from '@/components/admin/verifyDistributor';
 import Payments from '@/components/admin/payments';
 import Quotations from '@/components/admin/quotations';
 import Inventory from '@/components/admin/inventory';
+import Loading from '@/components/ui/buttons/Loading';
 // Make sure Customers is a valid React component that returns JSX
 
 const AdminDashboard = () => {
@@ -637,7 +638,6 @@ const AdminDashboard = () => {
                         </div>
                     </div>
                 </div>
-
                 {/* Upcoming Restock */}
                 <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-md border border-gray-100 overflow-hidden">
                     <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
@@ -931,9 +931,7 @@ const AdminDashboard = () => {
                 {/* Page Content */}
                 <main className="p-5 bg-gray-50 min-h-[calc(100vh-5.5rem)]">
                     {loading ? (
-                        <div className="flex items-center justify-center h-64">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                        </div>
+                        <Loading />
                     ) : (
                         renderContent()
                     )}

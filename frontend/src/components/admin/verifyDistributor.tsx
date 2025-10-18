@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { post, get } from '@/lib/api';
+import Loading from '../ui/buttons/Loading';
 const VerifyDistributor = () => {
     const [isDistributorLoading, setIsDistributorLoading] = useState(true);
     const [distributors, setDistributors] = useState<DistributorApplication[]>([]);
@@ -71,12 +72,7 @@ const VerifyDistributor = () => {
 
     if (isDistributorLoading) {
         return (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
-                <div className="flex items-center justify-center space-x-3">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-                    <span className="text-lg text-gray-600">Loading distributor applications...</span>
-                </div>
-            </div>
+            <Loading message="distributor applications" />
         );
     }
 

@@ -30,6 +30,7 @@ import ViewButton from '../ui/buttons/ViewButton';
 import EditButton from '../ui/buttons/EditButton';
 import DeleteButton from '../ui/buttons/DeleteButton';
 import { useCommonToasts } from '@/hooks/useCommonToasts';
+import Loading from '../ui/buttons/Loading';
 
 interface EditModalProps {
     product: Product;
@@ -1327,8 +1328,7 @@ const Inventory = () => {
             {/* Loading State */}
             {isLoading ? (
                 <div className="flex justify-center items-center py-12">
-                    <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-                    <span className="ml-2 text-gray-600">Loading products...</span>
+                    <Loading message='products'/>
                 </div>
             ) : (
                 <>

@@ -24,6 +24,7 @@ import ViewButton from '../ui/buttons/ViewButton';
 import DownloadButton from '../ui/buttons/DownloadButton';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import Loading from '../ui/buttons/Loading';
 
 interface OrderItem {
     id: string;
@@ -278,9 +279,7 @@ const Orders = () => {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-64">
-                <div className="text-lg text-gray-600">Loading orders...</div>
-            </div>
+            <Loading message='orders' />
         );
     }
     const handleViewOrder = (order: GroupedOrder) => {
