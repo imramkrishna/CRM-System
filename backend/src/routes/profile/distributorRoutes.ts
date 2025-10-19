@@ -14,5 +14,4 @@ distributorRouter.get("/get-orders",getOrdersController)
 distributorRouter.post("/place-order", placeOrderController);
 distributorRouter.put("/update-order/:id", updateOrderController);
 distributorRouter.post("/payment-status", paymentRequestController);
-
 export default distributorRouter;

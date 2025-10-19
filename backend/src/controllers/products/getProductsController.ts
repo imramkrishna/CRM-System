@@ -3,7 +3,7 @@ import prisma from "../../utils/prismaClient";
 import { StatusCode } from "../../types";
 import { logActivity } from "../../utils/activityLogger";
 
-export const getProductsController = async (req: any, res: any) => {
+export const getProductsController = async (req: Request, res: Response) => {
     try {
         const {
             search,

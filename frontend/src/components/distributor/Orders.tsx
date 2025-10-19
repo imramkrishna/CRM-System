@@ -33,7 +33,6 @@ import ViewButton from '@/components/ui/buttons/ViewButton';
 import EditButton from '@/components/ui/buttons/EditButton';
 import DeleteButton from '@/components/ui/buttons/DeleteButton';
 import Loading from '../ui/buttons/Loading';
-
 interface OrderItem {
     id: string;
     orderId: string;
@@ -631,18 +630,42 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, isOpen, onClose,
     const handleSave = async () => {
         setLoading(true);
         try {
-            const response = await put(`/distributor/update-order/${order.id}`, {
-                notes: editedOrder.notes,
-                requestedDeliveryDate: editedOrder.requestedDeliveryDate,
-                orderItems: editedOrder.orderItems
-            }, { withCredentials: true });
+            // Prepare data for update - only send what can be updated
+            const updateData: any = {
+                notes: editedOrder.notes || null
+            };
 
-            onUpdate(response.data.order);
+            // Convert date to ISO-8601 DateTime format if provided
+            if (editedOrder.requestedDeliveryDate) {
+                // Create a date object and convert to ISO string
+                const date = new Date(editedOrder.requestedDeliveryDate);
+                updateData.requestedDeliveryDate = date.toISOString();
+            }
+
+            console.log('Sending update data:', updateData); // Debug log
+
+            const response = await put(
+                `/distributor/update-order/${order.id}`, 
+                updateData,
+                { 
+                    withCredentials: true,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+            );
+
+            console.log('Update response:', response); // Debug log
+
+            // Update the order in parent component
+            onUpdate(response.data);
+            
             alert('Order updated successfully!');
             onClose();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error updating order:', error);
-            alert('Failed to update order. Please try again.');
+            const errorMessage = error?.response?.data?.message || 'Failed to update order. Please try again.';
+            alert(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -878,6 +901,7 @@ const Orders = () => {
             alert('Failed to fetch orders. Please try again.');
         } finally {
             setLoading(false);
+            router.push("/distributor")
         }
     }, []);
 
@@ -996,21 +1020,29 @@ const Orders = () => {
 
     // Handle order operations
     const handleViewOrder = (order: Order) => {
+        console.log(order)
         setSelectedOrder(order);
         setShowOrderDetails(true);
     };
 
     const handleUpdateOrder = (updatedOrder: Order) => {
-        setOrders(prevOrders => 
-            prevOrders.map(order => 
-                order.id === updatedOrder.id ? updatedOrder : order
-            )
-        );
+        try{
+            const response = put(`/distributor/update-order/${updatedOrder.id}`, updatedOrder, { withCredentials: true });
+            // Update order in local state
+            setOrders(prevOrders => 
+                prevOrders.map(order => 
+                    order.id === updatedOrder.id ? updatedOrder : order
+                )
+            );
+            console.log("Response after updating order:", response);
+        }catch(error){
+            console.log("Error while updating order:", error);
+        }
     };
 
     const handleCancelOrder = async (orderId: string) => {
         try {
-            await del(`/distributor/cancel-order/${orderId}`, {
+            await del(`/distributor/update-order/${orderId}`, {
                 withCredentials: true
             });
             
@@ -1026,6 +1058,8 @@ const Orders = () => {
             console.error('Error cancelling order:', error);
             alert('Failed to cancel order. Please try again.');
             throw error;
+        }finally{
+            router.push("/distributor");
         }
     };
 

@@ -4,7 +4,6 @@ import { StatusCode } from "../../types";
 const getOrdersController=async(req:Request,res:Response):Promise<Response | void>=>{
     try {
         const distributorId = req.user?.id;
-        console.log("Fetching orders for distributor ID:", distributorId);
         if (!distributorId) {
             return res.status(StatusCode.BAD_REQUEST).json({ message: "Distributor ID not found in token" });
         }
@@ -32,10 +31,8 @@ const getOrdersController=async(req:Request,res:Response):Promise<Response | voi
                 }
             }))
         );
-        console.log("Fetched Products ordered:", productsOrdered);
         return res.status(StatusCode.SUCCESS).json({ orders, productsOrdered });
     } catch (error) {
-        console.error("Error fetching orders:", error);
         return res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ message: "Error fetching orders" });
     }
 }
