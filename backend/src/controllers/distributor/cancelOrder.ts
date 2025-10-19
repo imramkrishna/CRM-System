@@ -52,16 +52,16 @@ const cancelOrderController = async (req: Request, res: Response): Promise<Respo
             });
         });
 
-        // Log activity
-        await logActivity({
-            distributorId: order.distributorId,
-            action: "Order Cancelled",
-            details: {
-                orderId: order.id,
-                orderNumber: order.orderNumber,
-                fromStatus: order.status
-            }
-        });
+        // // Log activity
+        // await logActivity({
+        //     distributorId: order.distributorId,
+        //     action: "Order Cancelled",
+        //     details: {
+        //         orderId: order.id,
+        //         orderNumber: order.orderNumber,
+        //         fromStatus: order.status
+        //     }
+        // });
 
         return res.status(StatusCode.SUCCESS).json({
             message: "Order cancelled successfully"

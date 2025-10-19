@@ -886,7 +886,8 @@ const Orders = () => {
             const response = await get('/distributor/get-orders', {
                 withCredentials: true
             });
-            
+            setOrders([]);
+            setFilteredOrders([]);
             // Handle the API response structure with orders array
             const ordersData = response.data?.orders && Array.isArray(response.data.orders) 
                 ? response.data.orders 
@@ -1042,9 +1043,10 @@ const Orders = () => {
 
     const handleCancelOrder = async (orderId: string) => {
         try {
-            await del(`/distributor/update-order/${orderId}`, {
+            const response = await get(`/distributor/cancel-order/${orderId}`, {
                 withCredentials: true
             });
+            console.log('Cancel order response:', response);
             
             // Update order status locally
             setOrders(prevOrders => 
