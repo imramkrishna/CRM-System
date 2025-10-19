@@ -139,7 +139,7 @@ const Products = () => {
     const fetchProducts = async () => {
         setIsLoading(true);
         try {
-            const response = await get("/admin/getProducts", {
+            const response = await get("/products", {
                 withCredentials: true
             });
             
