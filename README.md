@@ -1,4 +1,4 @@
-# HarmonySurgiTech - Advanced Surgical Solutions Platform
+# Med CRM - Advanced Surgical Solutions Platform
 
 [![Next.js](https://img.shields.io/badge/Next.js-15.4.6-black?style=flat-square&logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org)
@@ -6,11 +6,11 @@
 [![Prisma](https://img.shields.io/badge/Prisma-6.13.0-darkgreen?style=flat-square&logo=prisma)](https://www.prisma.io)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com)
 
-A comprehensive medical equipment distribution platform designed for healthcare professionals, distributors, and administrators. HarmonySurgiTech provides a modern, scalable solution for managing surgical instruments, medical equipment procurement, and distributor networks.
+A comprehensive medical equipment distribution platform designed for healthcare professionals, distributors, and administrators. Med CRM provides a modern, scalable solution for managing surgical instruments, medical equipment procurement, and distributor networks.
 
 ## 🏥 Project Overview
 
-HarmonySurgiTech is a full-stack web application that serves as a digital marketplace and management system for surgical instruments and medical equipment. The platform connects healthcare institutions with verified distributors while providing robust administrative tools for inventory management, order processing, and business analytics.
+Med CRM is a full-stack web application that serves as a digital marketplace and management system for surgical instruments and medical equipment. The platform connects healthcare institutions with verified distributors while providing robust administrative tools for inventory management, order processing, and business analytics.
 
 ### 🎯 Core Purpose
 
@@ -132,8 +132,8 @@ HarmonySurgiTech is a full-stack web application that serves as a digital market
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/imramkrishna/HarmonySurgiTech.git
-cd HarmonySurgiTech
+git clone https://github.com/imramkrishna/Med CRM.git
+cd Med CRM
 ```
 
 2. **Backend Setup**
@@ -453,7 +453,7 @@ We welcome contributions from the medical technology community!
 
 1. **Fork the repository**
 ```bash
-git clone https://github.com/yourusername/HarmonySurgiTech.git
+git clone https://github.com/yourusername/Med CRM.git
 ```
 
 2. **Create a feature branch**
@@ -496,7 +496,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ```
 MIT License
 
-Copyright (c) 2024 HarmonySurgiTech
+Copyright (c) 2024 Med CRM
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -517,13 +517,13 @@ copies or substantial portions of the Software.
 
 ### Contact Information
 - **Email**: contact@harmonytech.com
-- **GitHub**: [HarmonySurgiTech Repository](https://github.com/imramkrishna/HarmonySurgiTech)
-- **Issues**: [Report Issues](https://github.com/imramkrishna/HarmonySurgiTech/issues)
+- **GitHub**: [Med CRM Repository](https://github.com/imramkrishna/Med CRM)
+- **Issues**: [Report Issues](https://github.com/imramkrishna/Med CRM/issues)
 
 ### Support
 For technical support or questions:
 1. Check the [FAQ section](#faq)
-2. Search existing [GitHub Issues](https://github.com/imramkrishna/HarmonySurgiTech/issues)
+2. Search existing [GitHub Issues](https://github.com/imramkrishna/Med CRM/issues)
 3. Create a new issue with detailed information
 4. For urgent matters, contact: support@harmonytech.com
 
@@ -566,7 +566,7 @@ A: The platform includes security best practices. For HIPAA compliance, addition
 
 **Built with ❤️ for the medical community**
 
-[![GitHub Stars](https://img.shields.io/github/stars/imramkrishna/HarmonySurgiTech?style=social)](https://github.com/imramkrishna/HarmonySurgiTech/stargazers)
-[![GitHub Forks](https://img.shields.io/github/forks/imramkrishna/HarmonySurgiTech?style=social)](https://github.com/imramkrishna/HarmonySurgiTech/network/members)
+[![GitHub Stars](https://img.shields.io/github/stars/imramkrishna/Med CRM?style=social)](https://github.com/imramkrishna/Med CRM/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/imramkrishna/Med CRM?style=social)](https://github.com/imramkrishna/Med CRM/network/members)
 
 </div>
