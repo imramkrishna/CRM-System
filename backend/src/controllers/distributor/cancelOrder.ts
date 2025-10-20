@@ -1,17 +1,17 @@
 import { Request, Response } from "express";
 import prisma from "../../utils/prismaClient";
 import { StatusCode } from "../../types";
-import { logActivity } from "../../utils/activityLogger";
 
 const cancelOrderController = async (req: Request, res: Response): Promise<Response | void> => {
     const id = req.params.id;
     
     try {
+        console.log("Cancelling order with ID:", id);
         const order = await prisma.order.findUnique({
             where: { id: id }
         });
 
-        if (!order) {
+        if (!order) {   
             return res.status(StatusCode.NOT_FOUND).json({
                 message: "The order does not exist"
             });
@@ -68,7 +68,7 @@ const cancelOrderController = async (req: Request, res: Response): Promise<Respo
         });
 
     } catch (e) {
-        console.error("Error cancelling order:", e);
+        console.log("Error cancelling order:", e);
         return res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
             message: "Error while cancelling order"
         });

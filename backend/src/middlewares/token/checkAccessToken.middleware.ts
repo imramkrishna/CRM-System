@@ -4,7 +4,6 @@ import jwt from "jsonwebtoken";
 import { StatusCode } from "../../types";
 import { User } from "../../types";
 import { generateAccessToken } from "../../utils/generateToken";
-import validateRefreshToken from "../../utils/validateRefreshToken";
 declare global {
   namespace Express {
     interface Request {
@@ -30,13 +29,12 @@ const checkAccessTokenMiddleware = async (
     // Handle refresh token logic here
     try {
       const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET!) as User;
-
       const newAccessToken = await generateAccessToken(refreshToken);
       res.cookie("accessToken", newAccessToken, {
         httpOnly: true,
         secure: true, // Required for cross-origin HTTPS
         sameSite: "none", // Required for cross-origin cookies
-        maxAge: 40 * 1000, // 40 seconds
+        maxAge: 15 * 60 * 1000, // 15 minutes
         domain: undefined // Let browser handle domain
       });
       req.user = decoded;

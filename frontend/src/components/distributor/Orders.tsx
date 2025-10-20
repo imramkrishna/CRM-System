@@ -115,7 +115,7 @@ const PlaceOrderModal: React.FC<PlaceOrderModalProps> = ({ isOpen, onClose, onPl
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [showProductSelector, setShowProductSelector] = useState(false);
-    
+
     // Get current user from auth state
     const { user } = useAppSelector((state) => state.auth);
 
@@ -128,7 +128,7 @@ const PlaceOrderModal: React.FC<PlaceOrderModalProps> = ({ isOpen, onClose, onPl
 
     const fetchProducts = async () => {
         try {
-            const response = await get('/distributor/get-orders', { withCredentials: true });
+            const response = await get('/distributor/products', { withCredentials: true });
             setProducts(response.data.filter((p: Product) => p.isActive));
         } catch (error) {
             console.error('Error fetching products:', error);
@@ -143,7 +143,7 @@ const PlaceOrderModal: React.FC<PlaceOrderModalProps> = ({ isOpen, onClose, onPl
             const unitPrice = parseFloat(product.listPrice);
             const quantity = product.minOrderQuantity || 1;
             const lineTotal = unitPrice * quantity;
-            
+
             const newItem: OrderItemInput = {
                 productId: product.id,
                 quantity,
@@ -153,7 +153,7 @@ const PlaceOrderModal: React.FC<PlaceOrderModalProps> = ({ isOpen, onClose, onPl
                 discountAmount: 0,
                 lineTotal
             };
-            
+
             setSelectedItems([...selectedItems, newItem]);
         }
         setShowProductSelector(false);
@@ -183,11 +183,11 @@ const PlaceOrderModal: React.FC<PlaceOrderModalProps> = ({ isOpen, onClose, onPl
                     const subtotal = item.unitPrice * item.quantity;
                     const discountAmount = (subtotal * discountPercent) / 100;
                     const lineTotal = subtotal - discountAmount;
-                    return { 
-                        ...item, 
-                        discountPercent, 
+                    return {
+                        ...item,
+                        discountPercent,
                         discountAmount,
-                        lineTotal 
+                        lineTotal
                     };
                 }
                 return item;
@@ -212,7 +212,7 @@ const PlaceOrderModal: React.FC<PlaceOrderModalProps> = ({ isOpen, onClose, onPl
 
         try {
             setLoading(true);
-            
+
             const orderData = {
                 distributorId: parseInt(user.id), // Use actual user ID from auth state
                 items: selectedItems,
@@ -221,7 +221,7 @@ const PlaceOrderModal: React.FC<PlaceOrderModalProps> = ({ isOpen, onClose, onPl
             };
 
             await onPlaceOrder(orderData);
-            
+
             // Reset form
             setSelectedItems([]);
             setNotes('');
@@ -299,7 +299,7 @@ const PlaceOrderModal: React.FC<PlaceOrderModalProps> = ({ isOpen, onClose, onPl
                                                 <Trash2 className="h-4 w-4" />
                                             </button>
                                         </div>
-                                        
+
                                         <div className="grid grid-cols-3 gap-4 mt-4">
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700">Quantity</label>
@@ -645,9 +645,9 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, isOpen, onClose,
             console.log('Sending update data:', updateData); // Debug log
 
             const response = await put(
-                `/distributor/update-order/${order.id}`, 
+                `/distributor/update-order/${order.id}`,
                 updateData,
-                { 
+                {
                     withCredentials: true,
                     headers: {
                         'Content-Type': 'application/json'
@@ -659,7 +659,7 @@ const EditOrderModal: React.FC<EditOrderModalProps> = ({ order, isOpen, onClose,
 
             // Update the order in parent component
             onUpdate(response.data);
-            
+
             alert('Order updated successfully!');
             onClose();
         } catch (error: any) {
@@ -810,7 +810,7 @@ const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({ order, isOpen, 
                             <p className="text-sm text-gray-600 mb-4">
                                 Are you sure you want to delete this order? This action cannot be undone.
                             </p>
-                            
+
                             {/* Order Summary */}
                             <div className="bg-red-50 rounded-lg p-4 border border-red-200">
                                 <h4 className="font-semibold text-red-900 mb-2">Order to be deleted:</h4>
@@ -886,11 +886,10 @@ const Orders = () => {
             const response = await get('/distributor/get-orders', {
                 withCredentials: true
             });
-            setOrders([]);
-            setFilteredOrders([]);
+
             // Handle the API response structure with orders array
-            const ordersData = response.data?.orders && Array.isArray(response.data.orders) 
-                ? response.data.orders 
+            const ordersData = response.data?.orders && Array.isArray(response.data.orders)
+                ? response.data.orders
                 : [];
             setOrders(ordersData);
             setFilteredOrders(ordersData);
@@ -902,7 +901,6 @@ const Orders = () => {
             alert('Failed to fetch orders. Please try again.');
         } finally {
             setLoading(false);
-            router.push("/distributor")
         }
     }, []);
 
@@ -925,8 +923,8 @@ const Orders = () => {
             filtered = filtered.filter(order =>
                 order.orderNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 order.notes?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                (order.orderItems && Array.isArray(order.orderItems) && 
-                    order.orderItems.some(item => 
+                (order.orderItems && Array.isArray(order.orderItems) &&
+                    order.orderItems.some(item =>
                         item.productName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         item.productSku?.toLowerCase().includes(searchTerm.toLowerCase())
                     )
@@ -943,7 +941,7 @@ const Orders = () => {
         if (dateFilter !== 'ALL') {
             const now = new Date();
             const cutoffDate = new Date();
-            
+
             switch (dateFilter) {
                 case 'TODAY':
                     cutoffDate.setHours(0, 0, 0, 0);
@@ -963,7 +961,7 @@ const Orders = () => {
         // Sorting
         filtered.sort((a, b) => {
             let aValue, bValue;
-            
+
             switch (sortBy) {
                 case 'orderNumber':
                     aValue = a.orderNumber || '';
@@ -1011,7 +1009,7 @@ const Orders = () => {
     const getStatusIcon = (status: string) => {
         switch (status) {
             case 'APPROVED': return <CheckCircle className="h-4 w-4" />;
-            case 'REJECTED': 
+            case 'REJECTED':
             case 'CANCELLED': return <XCircle className="h-4 w-4" />;
             case 'PENDING': return <Clock className="h-4 w-4" />;
             case 'PROCESSING': return <RefreshCw className="h-4 w-4" />;
@@ -1027,42 +1025,40 @@ const Orders = () => {
     };
 
     const handleUpdateOrder = (updatedOrder: Order) => {
-        try{
+        try {
             const response = put(`/distributor/update-order/${updatedOrder.id}`, updatedOrder, { withCredentials: true });
             // Update order in local state
-            setOrders(prevOrders => 
-                prevOrders.map(order => 
+            setOrders(prevOrders =>
+                prevOrders.map(order =>
                     order.id === updatedOrder.id ? updatedOrder : order
                 )
             );
             console.log("Response after updating order:", response);
-        }catch(error){
+        } catch (error) {
             console.log("Error while updating order:", error);
         }
     };
-
     const handleCancelOrder = async (orderId: string) => {
         try {
             const response = await get(`/distributor/cancel-order/${orderId}`, {
                 withCredentials: true
             });
             console.log('Cancel order response:', response);
-            
+
             // Update order status locally
-            setOrders(prevOrders => 
-                prevOrders.map(order => 
+            setOrders(prevOrders =>
+                prevOrders.map(order =>
                     order.id === orderId ? { ...order, status: 'CANCELLED' } : order
                 )
             );
-            
+
             alert('Order cancelled successfully!');
         } catch (error) {
             console.error('Error cancelling order:', error);
             alert('Failed to cancel order. Please try again.');
             throw error;
-        }finally{
-            router.push("/distributor");
         }
+        // Remove the finally block with router.push
     };
 
     // New handlers for view, edit, and delete modals
@@ -1083,21 +1079,21 @@ const Orders = () => {
 
     const handleConfirmDelete = async () => {
         if (!orderToDelete) return;
-        
+
         try {
-            await del(`/distributor/cancel-order/${orderToDelete.id}`, {
+            await get(`/distributor/cancel-order/${orderToDelete.id}`, {
                 withCredentials: true
             });
-            
+
             // Remove order from list
-            setOrders(prevOrders => 
+            setOrders(prevOrders =>
                 prevOrders.filter(order => order.id !== orderToDelete.id)
             );
-            
+
             // Close modal
             setShowDeleteConfirm(false);
             setOrderToDelete(null);
-            
+
             alert('Order deleted successfully!');
         } catch (error) {
             console.error('Error deleting order:', error);
@@ -1118,10 +1114,10 @@ const Orders = () => {
     const indexOfLastOrder = currentPage * ordersPerPage;
     const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
     // Ensure filteredOrders is an array before slicing
-    const currentOrders = Array.isArray(filteredOrders) 
+    const currentOrders = Array.isArray(filteredOrders)
         ? filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder)
         : [];
-    const totalPages = Array.isArray(filteredOrders) 
+    const totalPages = Array.isArray(filteredOrders)
         ? Math.ceil(filteredOrders.length / ordersPerPage)
         : 0;
 
@@ -1225,7 +1221,7 @@ const Orders = () => {
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
-                                <th 
+                                <th
                                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                     onClick={() => handleSort('orderNumber')}
                                 >
@@ -1237,7 +1233,7 @@ const Orders = () => {
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Items
                                 </th>
-                                <th 
+                                <th
                                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                     onClick={() => handleSort('totalAmount')}
                                 >
@@ -1246,7 +1242,7 @@ const Orders = () => {
                                         <ArrowUpDown className="h-3 w-3" />
                                     </div>
                                 </th>
-                                <th 
+                                <th
                                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                     onClick={() => handleSort('status')}
                                 >
@@ -1255,7 +1251,7 @@ const Orders = () => {
                                         <ArrowUpDown className="h-3 w-3" />
                                     </div>
                                 </th>
-                                <th 
+                                <th
                                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                     onClick={() => handleSort('createdAt')}
                                 >
@@ -1299,7 +1295,7 @@ const Orders = () => {
                                                 {Array.isArray(order.orderItems) ? order.orderItems.length : 0} item{(Array.isArray(order.orderItems) ? order.orderItems.length : 0) !== 1 ? 's' : ''}
                                             </div>
                                             <div className="text-sm text-gray-500">
-                                                {Array.isArray(order.orderItems) 
+                                                {Array.isArray(order.orderItems)
                                                     ? order.orderItems.reduce((sum, item) => sum + (item.quantity || 0), 0)
                                                     : 0
                                                 } total qty
@@ -1325,17 +1321,17 @@ const Orders = () => {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div className="flex items-center space-x-2">
-                                                <ViewButton 
+                                                <ViewButton
                                                     onClick={() => handleViewOrderModal(order)}
                                                     size="md"
                                                 />
                                                 {(order.status === 'DRAFT' || order.status === 'PENDING') && (
                                                     <>
-                                                        <EditButton 
+                                                        <EditButton
                                                             onClick={() => handleEditOrderModal(order)}
                                                             size="md"
                                                         />
-                                                        <DeleteButton 
+                                                        <DeleteButton
                                                             onClick={() => handleDeleteOrderModal(order)}
                                                             size="md"
                                                         />
@@ -1394,11 +1390,10 @@ const Orders = () => {
                                             <button
                                                 key={pageNumber}
                                                 onClick={() => paginate(pageNumber)}
-                                                className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                                                    currentPage === pageNumber
-                                                        ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                                                        : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                                                }`}
+                                                className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${currentPage === pageNumber
+                                                    ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                                                    : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                                                    }`}
                                             >
                                                 {pageNumber}
                                             </button>
