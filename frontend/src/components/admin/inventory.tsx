@@ -1187,7 +1187,6 @@ const Inventory = () => {
                 withCredentials: true
             });
             setProducts(response.data.products);
-            console.log('Fetched products:', response.data.data.products);
         } catch (error) {
             console.error('Error fetching products:', error);
         } finally {

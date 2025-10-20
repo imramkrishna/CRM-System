@@ -657,7 +657,7 @@ const Orders = () => {
                                         </div>
                                         <div>
                                             <p className="text-green-600 text-sm font-medium">Payment Mode</p>
-                                            <p className="text-green-900 font-semibold">{selectedOrder.paymentStatus.mode.replace(/_/g, ' ')}</p>
+                                            <p className="text-green-900 font-semibold">{selectedOrder.paymentStatus.mode || "Not specified"}</p>
                                         </div>
                                         {selectedOrder.paymentStatus.txnId && (
                                             <div>

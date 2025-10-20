@@ -34,7 +34,7 @@ const checkAccessTokenMiddleware = async (
         httpOnly: true,
         secure: true, // Required for cross-origin HTTPS
         sameSite: "none", // Required for cross-origin cookies
-        maxAge: 15 * 60 * 1000, // 15 minutes
+        maxAge: 40 * 1000, // 40 seconds
         domain: undefined // Let browser handle domain
       });
       req.user = decoded;
