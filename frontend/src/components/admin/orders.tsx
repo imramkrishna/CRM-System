@@ -132,6 +132,8 @@ const Orders = () => {
     const [orderDetails, setOrderDetails] = useState<OrderItem[]>([]);
     const [groupedOrders, setGroupedOrders] = useState<GroupedOrder[]>([]);
     const [loading, setLoading] = useState(true);
+    const [statusFilter, setStatusFilter] = useState<string>('all');
+    const [distributorFilter, setDistributorFilter] = useState<string>('all');
 
     // Modal states
     const [showViewModal, setShowViewModal] = useState(false);
@@ -271,11 +273,25 @@ const Orders = () => {
     const pendingOrders = groupedOrders.filter(order => order.status === 'PENDING').length;
     const totalValue = groupedOrders.reduce((sum, order) => sum + order.totalAmount, 0);
 
-    // Filter orders based on search
-    const filteredOrders = groupedOrders.filter(order =>
-        order.productSummary.toLowerCase().includes(searchQueries.orders.toLowerCase()) ||
-        getOrderNumber(order.orderId).toLowerCase().includes(searchQueries.orders.toLowerCase())
-    );
+    // Get unique distributors for filter dropdown
+    const uniqueDistributors = Array.from(
+        new Set(groupedOrders.map(order => order.distributor?.companyName).filter(Boolean))
+    ).sort();
+
+    // Filter orders based on search, status, and distributor
+    const filteredOrders = groupedOrders.filter(order => {
+        const matchesSearch = order.productSummary.toLowerCase().includes(searchQueries.orders.toLowerCase()) ||
+            getOrderNumber(order.orderId).toLowerCase().includes(searchQueries.orders.toLowerCase()) ||
+            order.distributor?.companyName?.toLowerCase().includes(searchQueries.orders.toLowerCase()) ||
+            order.distributor?.ownerName?.toLowerCase().includes(searchQueries.orders.toLowerCase());
+        
+        const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+        
+        const matchesDistributor = distributorFilter === 'all' || 
+            order.distributor?.companyName === distributorFilter;
+        
+        return matchesSearch && matchesStatus && matchesDistributor;
+    });
 
     if (loading) {
         return (
@@ -479,23 +495,40 @@ const Orders = () => {
                             className="bg-transparent border-none outline-none text-sm text-gray-700 placeholder-gray-400"
                         />
                     </div>
-                    <select className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700">
-                        <option>All Status</option>
-                        <option>Pending</option>
-                        <option>Processing</option>
-                        <option>Shipped</option>
-                        <option>Delivered</option>
-                        <option>Cancelled</option>
+                    <select 
+                        className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700"
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                    >
+                        <option value="all">All Status</option>
+                        <option value="PENDING">Pending</option>
+                        <option value="PROCESSING">Processing</option>
+                        <option value="SHIPPED">Shipped</option>
+                        <option value="DELIVERED">Delivered</option>
+                        <option value="CANCELLED">Cancelled</option>
                     </select>
-                    <select className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700">
-                        <option>All Distributors</option>
-                        <option>MedSupply Co.</option>
-                        <option>Healthcare Plus</option>
-                        <option>SurgiTech Ltd.</option>
+                    <select 
+                        className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700"
+                        value={distributorFilter}
+                        onChange={(e) => setDistributorFilter(e.target.value)}
+                    >
+                        <option value="all">All Distributors</option>
+                        {uniqueDistributors.map((distributor) => (
+                            <option key={distributor} value={distributor}>
+                                {distributor}
+                            </option>
+                        ))}
                     </select>
-                    <button className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 flex items-center space-x-2 hover:bg-gray-100">
+                    <button 
+                        className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 flex items-center space-x-2 hover:bg-gray-100"
+                        onClick={() => {
+                            setSearchQueries({ orders: '' });
+                            setStatusFilter('all');
+                            setDistributorFilter('all');
+                        }}
+                    >
                         <Filter className="h-4 w-4" />
-                        <span>More Filters</span>
+                        <span>Clear Filters</span>
                     </button>
                 </div>
 
@@ -520,7 +553,8 @@ const Orders = () => {
                                         <div className="text-sm font-medium text-blue-600">{getOrderNumber(order.orderId)}</div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-medium text-gray-900">Unknown Distributor</div>
+                                        <div className="text-sm font-medium text-gray-900">{order.distributor?.companyName || 'Unknown Distributor'}</div>
+                                        <div className="text-xs text-gray-500">{order.distributor?.ownerName || ''}</div>
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="text-sm text-gray-900">{order.productSummary}</div>
